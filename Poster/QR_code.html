@@ -1,1 +1,997 @@
-The requested file reference is not currently visible. Use files.search or files.list to rediscover the file, then retry with a returned ref_id or file_id.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="RAMIFY OS — a plain-English technical walkthrough of the decision journey, evidence flow, Decision Receipts, verification and human review." />
+<title>RAMIFY OS — Behind the Decision</title>
+
+<style>
+/* =========================================================
+   RAMIFY OS — QR Technical Companion
+   Deliberately restrained, editorial visual language.
+   No external libraries or fonts required.
+   ========================================================= */
+
+:root{
+  --paper:#f3f0e9;
+  --surface:#fbfaf7;
+  --surface-2:#f7f4ee;
+  --ink:#171b22;
+  --muted:#69707c;
+  --line:#d8d3c8;
+  --line-dark:#b9b3a8;
+
+  --violet:#5c55c7;
+  --violet-pale:#ebe9fb;
+  --green:#23745f;
+  --green-pale:#e5f2ec;
+  --amber:#ad6918;
+  --amber-pale:#f8ecda;
+  --red:#a33f45;
+  --red-pale:#f6e5e7;
+  --blue:#315f91;
+  --blue-pale:#e5edf5;
+
+  --shadow:0 18px 50px rgba(28,31,36,.08);
+  --shadow-small:0 10px 25px rgba(28,31,36,.06);
+  --radius:22px;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:
+    linear-gradient(rgba(34,39,46,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,39,46,.025) 1px, transparent 1px),
+    var(--paper);
+  background-size:32px 32px;
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height:1.5;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid rgba(92,85,199,.22);outline-offset:3px}
+
+.progress{
+  position:fixed;z-index:80;left:0;top:0;height:3px;width:0;
+  background:linear-gradient(90deg,var(--violet),var(--green));
+}
+
+.shell{max-width:1160px;margin:auto;padding:18px 20px 48px}
+
+/* ---------- top navigation ---------- */
+.nav{
+  position:sticky;top:12px;z-index:60;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:10px 12px 10px 15px;
+  border:1px solid rgba(185,179,168,.75);
+  background:rgba(251,250,247,.88);
+  backdrop-filter:blur(16px);
+  border-radius:16px;
+  box-shadow:var(--shadow-small);
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:850;letter-spacing:-.02em}
+.brand-badge{
+  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  color:#fff;background:#20242c;font-weight:900;font-size:13px;
+}
+.nav-links{display:flex;gap:3px;flex-wrap:wrap}
+.nav-links a{
+  padding:8px 9px;border-radius:9px;color:var(--muted);
+  font-size:12px;font-weight:700;
+}
+.nav-links a:hover{background:#ebe8e1;color:var(--ink)}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative;overflow:hidden;
+  margin:24px 0 18px;
+  border:1px solid var(--line-dark);
+  border-radius:28px;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  display:grid;grid-template-columns:1.22fr .78fr;
+}
+.hero-main{padding:46px 42px 42px}
+.kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:900;
+  color:var(--violet)
+}
+.kicker:before{content:"";width:26px;height:2px;background:currentColor}
+h1{
+  margin:15px 0 14px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(46px,6vw,78px);
+  line-height:.96;
+  letter-spacing:-.045em;
+  font-weight:700;
+}
+.hero-copy{
+  max-width:720px;margin:0;color:#4e5663;
+  font-size:18px;line-height:1.68;
+}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.btn{
+  border:1px solid var(--line-dark);background:transparent;color:var(--ink);
+  padding:10px 14px;border-radius:999px;font-weight:800;cursor:pointer;
+  transition:.2s ease;
+}
+.btn:hover{transform:translateY(-2px);background:#f0ece4}
+.btn.primary{background:#20242c;color:#fff;border-color:#20242c}
+.hero-side{
+  min-height:100%;
+  border-left:1px solid var(--line);
+  background:#20242c;color:#fff;
+  padding:30px 28px;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+.hero-side small{color:#b9c0ca;text-transform:uppercase;letter-spacing:.1em;font-weight:800;font-size:10px}
+.hero-side h2{
+  margin:8px 0 0;font-family:Georgia,"Times New Roman",serif;
+  font-size:28px;line-height:1.1
+}
+.hero-route{
+  margin-top:28px;display:grid;gap:10px
+}
+.hero-route-row{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
+.hero-route-row .n{
+  width:26px;height:26px;border:1px solid rgba(255,255,255,.28);
+  border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:850;
+}
+.hero-route-row strong{display:block;font-size:13px}
+.hero-route-row span{display:block;color:#b9c0ca;font-size:11px;margin-top:2px}
+.hero-note{
+  border-top:1px solid rgba(255,255,255,.15);padding-top:15px;margin-top:24px;
+  color:#c7ccd4;font-size:11.5px;line-height:1.55
+}
+
+/* ---------- generic section ---------- */
+section{margin:22px 0}
+.section-head{
+  display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start;
+  margin-bottom:12px;padding:0 4px
+}
+.section-index{
+  color:var(--muted);font-size:11px;font-weight:900;
+  letter-spacing:.12em;text-transform:uppercase;padding-top:8px
+}
+.section-head h2{
+  margin:0;font-family:Georgia,"Times New Roman",serif;
+  font-size:34px;letter-spacing:-.025em;line-height:1.08
+}
+.section-head p{margin:8px 0 0;color:var(--muted);max-width:720px;font-size:13.5px;line-height:1.62}
+.panel{
+  border:1px solid var(--line-dark);background:var(--surface);
+  border-radius:var(--radius);box-shadow:var(--shadow)
+}
+
+/* ---------- journey ---------- */
+.journey-wrap{padding:26px}
+.journey-line{
+  position:relative;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
+}
+.journey-line:before{
+  content:"";position:absolute;left:8%;right:8%;top:34px;height:1px;background:var(--line-dark);z-index:0
+}
+.journey-step{
+  position:relative;z-index:1;text-align:left;
+  background:transparent;border:0;padding:0;cursor:pointer
+}
+.journey-dot{
+  width:68px;height:68px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--line-dark);background:var(--surface);
+  font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:700;
+  transition:.22s ease
+}
+.journey-step:hover .journey-dot,.journey-step.active .journey-dot{
+  background:#20242c;color:#fff;transform:translateY(-3px);
+  box-shadow:0 12px 25px rgba(32,36,44,.12)
+}
+.journey-step h3{margin:12px 0 4px;font-size:14px}
+.journey-step p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.4}
+.journey-detail{
+  margin-top:24px;border-top:1px solid var(--line);padding-top:20px;
+  display:grid;grid-template-columns:210px 1fr;gap:22px
+}
+.journey-detail small{
+  display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:900
+}
+.journey-detail h3{margin:6px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:25px}
+.journey-detail p{margin:0;color:#555d69;font-size:13.5px;line-height:1.68}
+.detail-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.meta-chip{padding:6px 8px;border:1px solid var(--line);border-radius:999px;font-size:10px;font-weight:800;color:#525966;background:#f7f4ee}
+
+/* ---------- architecture ---------- */
+.arch{
+  display:grid;grid-template-columns:1fr 42px 1.2fr 42px 1fr;
+  gap:8px;align-items:center;padding:26px
+}
+.arch-col{display:grid;gap:11px}
+.arch-label{
+  text-transform:uppercase;letter-spacing:.1em;font-size:10px;font-weight:900;color:var(--muted);
+  margin-bottom:2px
+}
+.arch-box{
+  position:relative;padding:17px;border:1px solid var(--line);
+  border-radius:16px;background:#fff;min-height:112px
+}
+.arch-box h3{margin:0 0 6px;font-size:14px}
+.arch-box p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
+.arch-box.user{background:#f4f1fc;border-color:#d7d2ef}
+.arch-box.trust{background:#eef7f3;border-color:#cfe4da}
+.arch-box.control{background:#fbf1df;border-color:#e8d2ae}
+.arch-box .tag{
+  display:inline-block;margin-top:10px;padding:5px 7px;border-radius:999px;
+  border:1px solid rgba(0,0,0,.07);background:rgba(255,255,255,.65);
+  font-size:9px;font-weight:850;color:#505866
+}
+.arch-arrow{display:grid;place-items:center;color:#8f97a5;font-size:22px}
+.arch-arrow .moving{
+  width:26px;height:1px;background:var(--line-dark);position:relative
+}
+.arch-arrow .moving:after{
+  content:"";position:absolute;width:5px;height:5px;border-radius:50%;
+  background:#20242c;top:-2px;left:0;animation:slide 1.8s infinite
+}
+@keyframes slide{0%{left:0;opacity:0}20%{opacity:1}100%{left:21px;opacity:0}}
+.arch-foot{
+  padding:0 26px 26px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px
+}
+.mini-fact{
+  padding:13px 14px;border-top:2px solid #20242c;background:#f8f5ef
+}
+.mini-fact small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+.mini-fact strong{display:block;margin-top:6px;font-size:13px}
+.mini-fact p{margin:4px 0 0;color:var(--muted);font-size:10.5px;line-height:1.45}
+
+/* ---------- flow map ---------- */
+.flow-grid{display:grid;grid-template-columns:1fr .92fr}
+.flow-list{padding:24px;border-right:1px solid var(--line)}
+.flow-row{
+  display:grid;grid-template-columns:38px 1fr auto;gap:11px;align-items:start;
+  padding:12px 0;border-bottom:1px solid var(--line)
+}
+.flow-row:last-child{border-bottom:0}
+.flow-num{
+  width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--line-dark);font-size:11px;font-weight:900;background:#fff
+}
+.flow-row strong{display:block;font-size:13px;margin-top:1px}
+.flow-row p{margin:4px 0 0;color:var(--muted);font-size:11.5px;line-height:1.5}
+.flow-token{
+  align-self:center;padding:5px 7px;border-radius:999px;
+  font-size:9px;font-weight:900;letter-spacing:.04em;
+  background:#eeeae2;color:#575f6b
+}
+.flow-map{
+  padding:24px;background:#20242c;color:#fff;display:flex;flex-direction:column;justify-content:center
+}
+.flow-map small{color:#abb2bd;text-transform:uppercase;letter-spacing:.1em;font-size:10px;font-weight:900}
+.flow-map h3{font-family:Georgia,"Times New Roman",serif;margin:7px 0 18px;font-size:24px}
+.flow-chain{display:grid;gap:8px}
+.chain-row{
+  display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
+  padding:11px 12px;border:1px solid rgba(255,255,255,.16);border-radius:12px;
+  background:rgba(255,255,255,.04)
+}
+.chain-row strong{font-size:12px}
+.chain-row span{font-size:10px;color:#b9c0ca}
+.chain-arrow{padding-left:12px;color:#8f98a7;font-size:14px}
+.flow-result{
+  margin-top:15px;padding:13px;border-radius:12px;
+  background:#f0e5ce;color:#73500f;font-size:11.5px;line-height:1.5
+}
+
+/* ---------- receipt anatomy ---------- */
+.receipt-layout{display:grid;grid-template-columns:1.06fr .94fr}
+.receipt-card{
+  margin:24px;border:1px solid #a9a398;background:#fff;
+  box-shadow:0 14px 35px rgba(28,31,36,.09);
+  position:relative
+}
+.receipt-card:before,.receipt-card:after{
+  content:"";position:absolute;left:0;right:0;height:9px;
+  background:repeating-linear-gradient(90deg,#fff 0 10px,transparent 10px 16px)
+}
+.receipt-card:before{top:-1px}.receipt-card:after{bottom:-1px}
+.receipt-head{
+  padding:22px 22px 16px;border-bottom:1px dashed #b8b2a7;
+  display:flex;justify-content:space-between;gap:16px
+}
+.receipt-head h3{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:25px}
+.receipt-head span{font-size:10px;color:var(--muted)}
+.receipt-body{padding:18px 22px}
+.receipt-row{
+  display:grid;grid-template-columns:145px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid #eeeae2;
+  cursor:pointer
+}
+.receipt-row:hover{background:#faf8f4}
+.receipt-row:last-child{border-bottom:0}
+.receipt-key{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:#7a8089}
+.receipt-value{font-size:12px;color:#39414d}
+.receipt-value code{font-size:10.5px;word-break:break-all}
+.receipt-side{
+  border-left:1px solid var(--line);padding:24px;background:#f8f5ef
+}
+.receipt-side h3{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:25px}
+.receipt-side p{margin:8px 0 16px;color:var(--muted);font-size:12.5px;line-height:1.6}
+.receipt-explain{
+  padding:14px;border-left:3px solid var(--violet);background:#fff;margin-top:10px
+}
+.receipt-explain small{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:9px;color:var(--muted);font-weight:900}
+.receipt-explain strong{display:block;margin-top:5px;font-size:13px}
+.receipt-explain p{margin:5px 0 0;font-size:11.5px;color:var(--muted)}
+
+/* ---------- trust/tamper lab ---------- */
+.trust-grid{display:grid;grid-template-columns:.9fr 1.1fr}
+.trust-copy{padding:26px;border-right:1px solid var(--line)}
+.trust-copy h3{font-family:Georgia,"Times New Roman",serif;margin:0;font-size:27px}
+.trust-copy p{color:var(--muted);font-size:12.5px;line-height:1.65}
+.trust-steps{display:grid;gap:9px;margin-top:17px}
+.trust-step{display:grid;grid-template-columns:28px 1fr;gap:9px}
+.trust-step .n{
+  width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  background:#20242c;color:#fff;font-size:10px;font-weight:900
+}
+.trust-step strong{display:block;font-size:12px}
+.trust-step span{display:block;color:var(--muted);font-size:10.8px;margin-top:2px}
+.lab{padding:26px;background:#f8f5ef}
+.lab-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.lab-top h3{margin:0;font-size:15px}
+.status{
+  padding:6px 8px;border-radius:999px;font-size:9px;font-weight:900;letter-spacing:.06em;
+  background:var(--green-pale);color:var(--green)
+}
+.status.bad{background:var(--red-pale);color:var(--red)}
+.lab-screen{
+  border:1px solid var(--line-dark);background:#20242c;color:#dce1e7;border-radius:16px;padding:16px;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:11px;line-height:1.65;
+  min-height:185px
+}
+.lab-line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);padding:7px 0}
+.lab-line:last-child{border-bottom:0}
+.lab-line span:first-child{color:#aab3bf}
+.lab-line span:last-child{text-align:right}
+.lab-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.lab-btn{
+  border:1px solid var(--line-dark);background:#fff;padding:9px 11px;border-radius:10px;font-size:11px;font-weight:850;cursor:pointer
+}
+.lab-btn:hover{background:#eee9e0}
+.lab-message{
+  margin-top:12px;padding:12px;border-radius:12px;background:var(--green-pale);color:#2e6657;
+  font-size:11.5px;line-height:1.5
+}
+.lab-message.bad{background:var(--red-pale);color:#7f3940}
+
+/* ---------- human review ---------- */
+.review{padding:26px}
+.review-track{
+  display:grid;grid-template-columns:1fr 50px 1fr 50px 1fr;gap:8px;align-items:center
+}
+.review-box{
+  padding:18px;border:1px solid var(--line);border-radius:16px;background:#fff;min-height:130px
+}
+.review-box h3{margin:0;font-size:14px}
+.review-box p{margin:6px 0 0;color:var(--muted);font-size:11.5px;line-height:1.5}
+.review-box.human{background:var(--amber-pale);border-color:#e5c59b}
+.review-box.next{background:var(--green-pale);border-color:#c9e3da}
+.review-arrow{text-align:center;color:#8f97a4;font-size:21px}
+.review-note{
+  margin-top:15px;padding:13px 15px;border-top:1px solid var(--line);
+  color:#59616c;font-size:11.5px;line-height:1.55
+}
+
+/* ---------- feature strip ---------- */
+.features{display:grid;grid-template-columns:repeat(3,1fr)}
+.feature{
+  padding:18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)
+}
+.feature:nth-child(3n){border-right:0}
+.feature:nth-last-child(-n+3){border-bottom:0}
+.feature small{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:900}
+.feature h3{margin:6px 0 5px;font-size:13px}
+.feature p{margin:0;color:var(--muted);font-size:11px;line-height:1.48}
+
+/* ---------- accordion ---------- */
+.accordion{padding:20px}
+.acc{border-bottom:1px solid var(--line)}
+.acc:last-child{border-bottom:0}
+.acc-btn{
+  width:100%;border:0;background:transparent;padding:14px 2px;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  text-align:left;cursor:pointer;font-weight:850;color:var(--ink)
+}
+.acc-btn span:last-child{color:#8d95a0}
+.acc-content{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.acc.open .acc-content{max-height:190px}
+.acc-content p{margin:0 0 15px;color:var(--muted);font-size:11.8px;line-height:1.62}
+
+/* ---------- footer ---------- */
+.footer{
+  padding:28px 4px 4px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  color:var(--muted);font-size:11px
+}
+
+@media(max-width:960px){
+  .hero{grid-template-columns:1fr}.hero-side{border-left:0;border-top:1px solid var(--line)}
+  .section-head{grid-template-columns:1fr;gap:4px}
+  .arch{grid-template-columns:1fr}.arch-arrow{transform:rotate(90deg)}
+  .arch-foot{grid-template-columns:1fr 1fr}
+  .flow-grid,.receipt-layout,.trust-grid{grid-template-columns:1fr}
+  .flow-list,.trust-copy{border-right:0;border-bottom:1px solid var(--line)}
+  .receipt-side{border-left:0;border-top:1px solid var(--line)}
+  .features{grid-template-columns:1fr 1fr}.feature:nth-child(3n){border-right:1px solid var(--line)}
+  .feature:nth-child(2n){border-right:0}
+}
+@media(max-width:700px){
+  .shell{padding:12px 12px 36px}.nav-links{display:none}
+  .hero-main{padding:30px 24px}.hero-side{padding:24px}
+  h1{font-size:48px}.hero-copy{font-size:16px}
+  .journey-line{grid-template-columns:1fr}.journey-line:before{display:none}
+  .journey-step{display:grid;grid-template-columns:58px 1fr;column-gap:12px}
+  .journey-dot{width:58px;height:58px;grid-row:1/3}
+  .journey-step h3{margin:4px 0 2px}.journey-step p{margin:0}
+  .journey-detail{grid-template-columns:1fr}
+  .arch-foot{grid-template-columns:1fr}
+  .review-track{grid-template-columns:1fr}.review-arrow{transform:rotate(90deg)}
+  .features{grid-template-columns:1fr}.feature,.feature:nth-child(3n),.feature:nth-child(2n){border-right:0}
+  .feature:nth-last-child(-n+3){border-bottom:1px solid var(--line)}.feature:last-child{border-bottom:0}
+  .receipt-row{grid-template-columns:1fr;gap:3px}
+}
+</style>
+</head>
+
+<body>
+<div class="progress" id="progress"></div>
+
+<div class="shell">
+  <nav class="nav">
+    <div class="brand">
+      <div class="brand-badge">R</div>
+      <span>RAMIFY OS · Behind the Decision</span>
+    </div>
+    <div class="nav-links">
+      <a href="#journey">Journey</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#flow">Data Flow</a>
+      <a href="#receipt">Receipt</a>
+      <a href="#trust">Verification</a>
+      <a href="#review">Human Review</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-main">
+      <div class="kicker">Technical companion to the project poster</div>
+      <h1>What happens behind a RAMIFY decision?</h1>
+      <p class="hero-copy">
+        The poster gives the short version. This page shows the machinery underneath:
+        how a decision moves through RAMIFY, how evidence is linked, how a Decision Receipt
+        is created, and what must be checked before an action is allowed.
+      </p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#journey">Follow one decision</a>
+        <a class="btn" href="#trust">Try the tamper check</a>
+      </div>
+    </div>
+
+    <aside class="hero-side">
+      <div>
+        <small>The short version</small>
+        <h2>A decision is not trusted just because a button was clicked.</h2>
+        <div class="hero-route">
+          <div class="hero-route-row"><div class="n">1</div><div><strong>Understand the need</strong><span>Identify the decision and its context.</span></div></div>
+          <div class="hero-route-row"><div class="n">2</div><div><strong>Record the choice</strong><span>Keep the decision and supporting evidence together.</span></div></div>
+          <div class="hero-route-row"><div class="n">3</div><div><strong>Verify the record</strong><span>Check integrity and signature before action.</span></div></div>
+        </div>
+      </div>
+      <div class="hero-note">Local-first demo · FastAPI workflow · Decision Receipts · SHA-256 · Ed25519 · human review · Action Gate</div>
+    </aside>
+  </header>
+
+  <section id="journey">
+    <div class="section-head">
+      <div class="section-index">01 · User journey</div>
+      <div>
+        <h2>The five stages the user sees</h2>
+        <p>The experience stays simple on purpose. Click a stage to see what RAMIFY is doing at that point.</p>
+      </div>
+    </div>
+
+    <div class="panel journey-wrap">
+      <div class="journey-line">
+        <button class="journey-step active"
+          data-title="Identify"
+          data-copy="The user explains the situation and what they are trying to decide. RAMIFY captures enough context to frame the decision before presenting choices."
+          data-meta="Need|Context|Starting point">
+          <div class="journey-dot">01</div><h3>Identify</h3><p>What are we trying to decide?</p>
+        </button>
+
+        <button class="journey-step"
+          data-title="Resolve"
+          data-copy="The user explores available paths, trade-offs and supporting information. The aim is to make the choice visible rather than hide it behind a black-box answer."
+          data-meta="Options|Trade-offs|Guidance">
+          <div class="journey-dot">02</div><h3>Resolve</h3><p>What are the realistic options?</p>
+        </button>
+
+        <button class="journey-step"
+          data-title="Status"
+          data-copy="RAMIFY shows the current decision state: what has been selected, what is still missing, and whether the decision is ready to move forward."
+          data-meta="Current state|Readiness|Missing items">
+          <div class="journey-dot">03</div><h3>Status</h3><p>Is the decision ready?</p>
+        </button>
+
+        <button class="journey-step"
+          data-title="Verify"
+          data-copy="The system checks the evidence and the Decision Receipt. It confirms that the record has not changed and that its digital signature is valid."
+          data-meta="Evidence|Integrity|Signature">
+          <div class="journey-dot">04</div><h3>Verify</h3><p>Can the record be trusted?</p>
+        </button>
+
+        <button class="journey-step"
+          data-title="Assess"
+          data-copy="The result is shown in a form that can be reviewed later. The user can see the outcome, the decision trail and the receipt that supports it."
+          data-meta="Outcome|Review|Audit trail">
+          <div class="journey-dot">05</div><h3>Assess</h3><p>What happened, and why?</p>
+        </button>
+      </div>
+
+      <div class="journey-detail">
+        <div>
+          <small>Selected stage</small>
+          <h3 id="journeyTitle">Identify</h3>
+          <div class="detail-meta" id="journeyMeta">
+            <span class="meta-chip">Need</span><span class="meta-chip">Context</span><span class="meta-chip">Starting point</span>
+          </div>
+        </div>
+        <p id="journeyCopy">The user explains the situation and what they are trying to decide. RAMIFY captures enough context to frame the decision before presenting choices.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <div class="section-head">
+      <div class="section-index">02 · Architecture</div>
+      <div>
+        <h2>Three layers, one decision trail</h2>
+        <p>This is the practical system view: the interface the user sees, the decision logic behind it, and the trust controls that sit before the final action.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="arch">
+        <div class="arch-col">
+          <div class="arch-label">Experience layer</div>
+          <div class="arch-box user">
+            <h3>RAMIFY Interface</h3>
+            <p>Guides the user through Identify, Resolve, Status, Verify and Assess.</p>
+            <span class="tag">Frontend</span>
+          </div>
+          <div class="arch-box">
+            <h3>Guided Tour & Personas</h3>
+            <p>Helps first-time users understand the journey and keeps different roles visually clear.</p>
+          </div>
+        </div>
+
+        <div class="arch-arrow"><div class="moving"></div></div>
+
+        <div class="arch-col">
+          <div class="arch-label">Decision layer</div>
+          <div class="arch-box">
+            <h3>FastAPI Application</h3>
+            <p>Receives requests, validates data, updates state and coordinates the workflow.</p>
+            <span class="tag">127.0.0.1 demo</span>
+          </div>
+          <div class="arch-box user">
+            <h3>Decision Logic</h3>
+            <p>Keeps track of options, current status, readiness and the information used to reach the choice.</p>
+          </div>
+          <div class="arch-box trust">
+            <h3>Evidence + Decision Receipt</h3>
+            <p>Links supporting information to a record of the decision so the trail can be checked later.</p>
+          </div>
+        </div>
+
+        <div class="arch-arrow"><div class="moving"></div></div>
+
+        <div class="arch-col">
+          <div class="arch-label">Trust & control layer</div>
+          <div class="arch-box trust">
+            <h3>Receipt Verifier</h3>
+            <p>Checks the SHA-256 digest and the Ed25519 signature.</p>
+            <span class="tag">Integrity + authenticity</span>
+          </div>
+          <div class="arch-box control">
+            <h3>Action Gate</h3>
+            <p>Allows, blocks or redirects the action depending on whether the required signed receipt is valid.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-foot">
+        <div class="mini-fact"><small>Interface</small><strong>Simple by design</strong><p>The complexity stays behind the screen.</p></div>
+        <div class="mini-fact"><small>Evidence</small><strong>Linked, not hidden</strong><p>Important inputs remain part of the trail.</p></div>
+        <div class="mini-fact"><small>Receipt</small><strong>Reviewable record</strong><p>The outcome is not just a transient screen state.</p></div>
+        <div class="mini-fact"><small>Action</small><strong>Gated by verification</strong><p>A valid receipt is part of the control path.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="flow">
+    <div class="section-head">
+      <div class="section-index">03 · Data flow</div>
+      <div>
+        <h2>What moves through the system?</h2>
+        <p>Rather than treating the process as one large black box, RAMIFY separates the user’s input, decision state, evidence, receipt and verification result.</p>
+      </div>
+    </div>
+
+    <div class="panel flow-grid">
+      <div class="flow-list">
+        <div class="flow-row">
+          <div class="flow-num">1</div>
+          <div><strong>User context enters the system</strong><p>The need, persona, choice and relevant inputs are captured.</p></div>
+          <span class="flow-token">INPUT</span>
+        </div>
+        <div class="flow-row">
+          <div class="flow-num">2</div>
+          <div><strong>Decision state is updated</strong><p>RAMIFY tracks the selected path, current status and any missing requirement.</p></div>
+          <span class="flow-token">STATE</span>
+        </div>
+        <div class="flow-row">
+          <div class="flow-num">3</div>
+          <div><strong>Evidence is linked</strong><p>Supporting artefacts and references stay connected to the decision.</p></div>
+          <span class="flow-token">EVIDENCE</span>
+        </div>
+        <div class="flow-row">
+          <div class="flow-num">4</div>
+          <div><strong>A Decision Receipt is built</strong><p>The important decision details are placed into one reviewable record.</p></div>
+          <span class="flow-token">RECEIPT</span>
+        </div>
+        <div class="flow-row">
+          <div class="flow-num">5</div>
+          <div><strong>The receipt is verified</strong><p>The content fingerprint and the digital signature are checked.</p></div>
+          <span class="flow-token">VERIFY</span>
+        </div>
+        <div class="flow-row">
+          <div class="flow-num">6</div>
+          <div><strong>The Action Gate decides what happens next</strong><p>Proceed, stop, or send the case to human review.</p></div>
+          <span class="flow-token">GATE</span>
+        </div>
+      </div>
+
+      <div class="flow-map">
+        <small>One-line system view</small>
+        <h3>Decision → record → verification → controlled action</h3>
+        <div class="flow-chain">
+          <div class="chain-row"><strong>User / Interface</strong><span>need + choice</span></div>
+          <div class="chain-arrow">↓</div>
+          <div class="chain-row"><strong>Decision State</strong><span>status + readiness</span></div>
+          <div class="chain-arrow">↓</div>
+          <div class="chain-row"><strong>Evidence Package</strong><span>supporting information</span></div>
+          <div class="chain-arrow">↓</div>
+          <div class="chain-row"><strong>Decision Receipt</strong><span>decision record</span></div>
+          <div class="chain-arrow">↓</div>
+          <div class="chain-row"><strong>Verification</strong><span>hash + signature</span></div>
+          <div class="chain-arrow">↓</div>
+          <div class="chain-row"><strong>Action Gate</strong><span>allow / block / review</span></div>
+        </div>
+        <div class="flow-result">The main idea: the final action is separated from the earlier decision steps. That creates a clear place to perform trust checks.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="receipt">
+    <div class="section-head">
+      <div class="section-index">04 · Decision Receipt</div>
+      <div>
+        <h2>The receipt is the audit trail</h2>
+        <p>A Decision Receipt is easier to understand if you think of it like a structured record of “what was decided, what supported it, and how we can verify it later.” Click a field to see why it matters.</p>
+      </div>
+    </div>
+
+    <div class="panel receipt-layout">
+      <div>
+        <div class="receipt-card">
+          <div class="receipt-head">
+            <div><h3>Decision Receipt</h3><span>Illustrative structure</span></div>
+            <span>RAMIFY OS</span>
+          </div>
+          <div class="receipt-body">
+            <div class="receipt-row" data-label="Decision" data-title="What was decided" data-text="The receipt records the chosen outcome rather than relying only on what was shown on screen.">
+              <div class="receipt-key">Decision</div><div class="receipt-value">Selected pathway / chosen action</div>
+            </div>
+            <div class="receipt-row" data-label="Evidence" data-title="What supported the decision" data-text="Evidence references keep the decision connected to the information used to reach it.">
+              <div class="receipt-key">Evidence</div><div class="receipt-value">Linked supporting artefacts and references</div>
+            </div>
+            <div class="receipt-row" data-label="Status" data-title="What state the decision was in" data-text="Status information helps show whether the required decision steps were complete at the time of the receipt.">
+              <div class="receipt-key">Status</div><div class="receipt-value">Verified / ready / review required</div>
+            </div>
+            <div class="receipt-row" data-label="Timestamp" data-title="When the record was created" data-text="Time information helps place the receipt in the history of the decision and later human review.">
+              <div class="receipt-key">Timestamp</div><div class="receipt-value">Created at decision time</div>
+            </div>
+            <div class="receipt-row" data-label="SHA-256" data-title="The content fingerprint" data-text="A SHA-256 digest changes when the protected receipt content changes, so it can be used to detect tampering.">
+              <div class="receipt-key">SHA-256</div><div class="receipt-value"><code>f8c2…4a91</code></div>
+            </div>
+            <div class="receipt-row" data-label="Ed25519" data-title="The digital signature" data-text="The signature provides a way to check that the receipt was signed by the expected key and has not been silently replaced.">
+              <div class="receipt-key">Ed25519</div><div class="receipt-value"><code>signature: valid</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="receipt-side">
+        <h3 id="receiptTitle">What was decided</h3>
+        <p id="receiptText">The receipt records the chosen outcome rather than relying only on what was shown on screen.</p>
+
+        <div class="receipt-explain">
+          <small>Plain English</small>
+          <strong>Think of the receipt as the “paper trail” of a digital decision.</strong>
+          <p>It gives RAMIFY something concrete to verify before an action is allowed.</p>
+        </div>
+
+        <div class="receipt-explain" style="border-left-color:var(--green)">
+          <small>Why it matters</small>
+          <strong>The final screen is not the only source of truth.</strong>
+          <p>The system keeps a separate record that can be checked again later.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="trust">
+    <div class="section-head">
+      <div class="section-index">05 · Verification</div>
+      <div>
+        <h2>Try the tamper check</h2>
+        <p>This small interactive demo explains the purpose of SHA-256 and Ed25519 without turning the page into a cryptography lesson.</p>
+      </div>
+    </div>
+
+    <div class="panel trust-grid">
+      <div class="trust-copy">
+        <h3>Two different questions are being checked.</h3>
+        <p><strong>SHA-256:</strong> “Has this protected content changed?”<br><strong>Ed25519:</strong> “Does this signature verify against the expected key?”</p>
+
+        <div class="trust-steps">
+          <div class="trust-step"><div class="n">1</div><div><strong>Build the receipt</strong><span>Put the decision and its supporting details into a stable record.</span></div></div>
+          <div class="trust-step"><div class="n">2</div><div><strong>Create the fingerprint</strong><span>Generate the SHA-256 digest for that receipt.</span></div></div>
+          <div class="trust-step"><div class="n">3</div><div><strong>Check the signature</strong><span>Verify the Ed25519 signature using the expected public key.</span></div></div>
+          <div class="trust-step"><div class="n">4</div><div><strong>Pass the result to the Action Gate</strong><span>Continue only when the required verification succeeds.</span></div></div>
+        </div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-top">
+          <h3>Receipt verification demo</h3>
+          <span class="status" id="statusBadge">VALID</span>
+        </div>
+
+        <div class="lab-screen">
+          <div class="lab-line"><span>receipt_id</span><span>R-2048</span></div>
+          <div class="lab-line"><span>decision</span><span id="decisionValue">selected_path_A</span></div>
+          <div class="lab-line"><span>sha256</span><span id="hashValue">f8c2…4a91</span></div>
+          <div class="lab-line"><span>signature</span><span id="signatureValue">valid</span></div>
+          <div class="lab-line"><span>action_gate</span><span id="gateValue">ALLOW</span></div>
+        </div>
+
+        <div class="lab-actions">
+          <button class="lab-btn" id="tamperBtn">Change receipt content</button>
+          <button class="lab-btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="lab-message" id="labMessage">
+          The receipt matches its expected fingerprint and signature. The Action Gate can continue.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="review">
+    <div class="section-head">
+      <div class="section-index">06 · Human review</div>
+      <div>
+        <h2>A review should add history, not erase it</h2>
+        <p>If a person needs to intervene, RAMIFY can preserve the original receipt and create a successor receipt for the reviewed outcome.</p>
+      </div>
+    </div>
+
+    <div class="panel review">
+      <div class="review-track">
+        <div class="review-box">
+          <h3>Original Receipt</h3>
+          <p>The first signed decision record remains available as part of the history.</p>
+        </div>
+        <div class="review-arrow">→</div>
+        <div class="review-box human">
+          <h3>Human Review</h3>
+          <p>A reviewer records the reason for the intervention and the updated outcome.</p>
+        </div>
+        <div class="review-arrow">→</div>
+        <div class="review-box next">
+          <h3>Successor Receipt</h3>
+          <p>A new signed receipt is created and linked back to the earlier one.</p>
+        </div>
+      </div>
+      <div class="review-note">This avoids silently overwriting the earlier decision. A reviewer can see both the original state and the later human-reviewed continuation.</div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-head">
+      <div class="section-index">07 · Product details</div>
+      <div>
+        <h2>Other parts of the RAMIFY experience</h2>
+        <p>These features support the journey around the core decision and verification flow.</p>
+      </div>
+    </div>
+
+    <div class="panel features">
+      <div class="feature"><small>Onboarding</small><h3>Guided Tour</h3><p>Introduces the journey so a first-time user knows where to start.</p></div>
+      <div class="feature"><small>Orientation</small><h3>Overview Voice-over</h3><p>Explains the experience before the user starts making choices.</p></div>
+      <div class="feature"><small>Clarity</small><h3>Persona Colour Coding</h3><p>Helps distinguish perspectives or roles in the interface.</p></div>
+      <div class="feature"><small>Commitment</small><h3>Shopping Cart Lock-in</h3><p>Reduces accidental changes once the decision reaches a committed stage.</p></div>
+      <div class="feature"><small>Decision Point</small><h3>Resolve UI</h3><p>Makes the moment of choice visible rather than hiding it behind the flow.</p></div>
+      <div class="feature"><small>Deployment</small><h3>Local-first Demo</h3><p>The demo can run on 127.0.0.1, with optional local model support through Ollama.</p></div>
+    </div>
+  </section>
+
+  <section id="details">
+    <div class="section-head">
+      <div class="section-index">08 · Technical notes</div>
+      <div>
+        <h2>For reviewers who want the deeper version</h2>
+        <p>The page stays readable for non-ICT visitors, while the technical details are still available here.</p>
+      </div>
+    </div>
+
+    <div class="panel accordion">
+      <div class="acc">
+        <button class="acc-btn"><span>Why use a separate Decision Receipt?</span><span>＋</span></button>
+        <div class="acc-content"><p>A receipt separates the auditable decision record from the temporary user interface state. It can carry the outcome, evidence references, metadata and verification material in one place.</p></div>
+      </div>
+
+      <div class="acc">
+        <button class="acc-btn"><span>What does the Action Gate check?</span><span>＋</span></button>
+        <div class="acc-content"><p>The Action Gate sits after verification. In the intended flow, it requires the necessary signed receipt checks to pass before the action proceeds; an invalid or tampered record can be blocked or sent for review.</p></div>
+      </div>
+
+      <div class="acc">
+        <button class="acc-btn"><span>How does the tamper test help?</span><span>＋</span></button>
+        <div class="acc-content"><p>The demo deliberately changes receipt content and then shows verification failing. That demonstrates the integrity mechanism as behaviour, not just as text on the screen.</p></div>
+      </div>
+
+      <div class="acc">
+        <button class="acc-btn"><span>What is the local-first setup?</span><span>＋</span></button>
+        <div class="acc-content"><p>The demonstration is designed to run locally on 127.0.0.1. Optional Ollama support can provide a local model path, while receipt verification remains a separate trust mechanism.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>RAMIFY OS · QR technical companion</span>
+    <span>Identify → Resolve → Status → Verify → Assess</span>
+  </footer>
+</div>
+
+<script>
+/* ---------- scroll progress ---------- */
+const progress = document.getElementById("progress");
+function updateProgress(){
+  const doc = document.documentElement;
+  const max = doc.scrollHeight - doc.clientHeight;
+  progress.style.width = (max ? (doc.scrollTop / max) * 100 : 0) + "%";
+}
+document.addEventListener("scroll", updateProgress, {passive:true});
+updateProgress();
+
+/* ---------- journey interaction ---------- */
+const steps = [...document.querySelectorAll(".journey-step")];
+const journeyTitle = document.getElementById("journeyTitle");
+const journeyCopy = document.getElementById("journeyCopy");
+const journeyMeta = document.getElementById("journeyMeta");
+
+steps.forEach(step=>{
+  step.addEventListener("click",()=>{
+    steps.forEach(s=>s.classList.remove("active"));
+    step.classList.add("active");
+    journeyTitle.textContent = step.dataset.title;
+    journeyCopy.textContent = step.dataset.copy;
+    journeyMeta.innerHTML = "";
+    step.dataset.meta.split("|").forEach(item=>{
+      const chip = document.createElement("span");
+      chip.className = "meta-chip";
+      chip.textContent = item;
+      journeyMeta.appendChild(chip);
+    });
+  });
+});
+
+/* ---------- receipt anatomy ---------- */
+const receiptRows = [...document.querySelectorAll(".receipt-row")];
+const receiptTitle = document.getElementById("receiptTitle");
+const receiptText = document.getElementById("receiptText");
+
+receiptRows.forEach(row=>{
+  row.addEventListener("click",()=>{
+    receiptTitle.textContent = row.dataset.title;
+    receiptText.textContent = row.dataset.text;
+    receiptRows.forEach(r=>r.style.outline="none");
+    row.style.outline="2px solid rgba(92,85,199,.18)";
+  });
+});
+
+/* ---------- tamper simulation ---------- */
+const tamperBtn = document.getElementById("tamperBtn");
+const resetBtn = document.getElementById("resetBtn");
+const statusBadge = document.getElementById("statusBadge");
+const decisionValue = document.getElementById("decisionValue");
+const hashValue = document.getElementById("hashValue");
+const signatureValue = document.getElementById("signatureValue");
+const gateValue = document.getElementById("gateValue");
+const labMessage = document.getElementById("labMessage");
+
+function setValid(){
+  statusBadge.textContent = "VALID";
+  statusBadge.classList.remove("bad");
+  decisionValue.textContent = "selected_path_A";
+  hashValue.textContent = "f8c2…4a91";
+  signatureValue.textContent = "valid";
+  gateValue.textContent = "ALLOW";
+  labMessage.classList.remove("bad");
+  labMessage.textContent = "The receipt matches its expected fingerprint and signature. The Action Gate can continue.";
+}
+
+function setTampered(){
+  statusBadge.textContent = "FAILED";
+  statusBadge.classList.add("bad");
+  decisionValue.textContent = "selected_path_B  ← changed";
+  hashValue.textContent = "mismatch";
+  signatureValue.textContent = "invalid";
+  gateValue.textContent = "BLOCK";
+  labMessage.classList.add("bad");
+  labMessage.textContent = "The receipt content changed. The expected fingerprint no longer matches, so the Action Gate blocks the action.";
+}
+
+tamperBtn.addEventListener("click", setTampered);
+resetBtn.addEventListener("click", setValid);
+
+/* ---------- accordion ---------- */
+document.querySelectorAll(".acc-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const box = btn.parentElement;
+    const wasOpen = box.classList.contains("open");
+
+    document.querySelectorAll(".acc").forEach(acc=>{
+      acc.classList.remove("open");
+      acc.querySelector(".acc-btn span:last-child").textContent = "＋";
+    });
+
+    if(!wasOpen){
+      box.classList.add("open");
+      btn.querySelector("span:last-child").textContent = "−";
+    }
+  });
+});
+
+/* ---------- quiet reveal ---------- */
+const reveal = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.animate(
+        [{opacity:0, transform:"translateY(10px)"},{opacity:1, transform:"translateY(0)"}],
+        {duration:420,easing:"ease-out",fill:"both"}
+      );
+      reveal.unobserve(entry.target);
+    }
+  });
+},{threshold:.08});
+
+document.querySelectorAll("section").forEach(section=>reveal.observe(section));
+</script>
+</body>
+</html>
