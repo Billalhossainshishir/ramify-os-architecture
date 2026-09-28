@@ -1,997 +1,160 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="RAMIFY OS — a plain-English technical walkthrough of the decision journey, evidence flow, Decision Receipts, verification and human review." />
-<title>RAMIFY OS — Behind the Decision</title>
-
-<style>
-/* =========================================================
-   RAMIFY OS — QR Technical Companion
-   Deliberately restrained, editorial visual language.
-   No external libraries or fonts required.
-   ========================================================= */
-
-:root{
-  --paper:#f3f0e9;
-  --surface:#fbfaf7;
-  --surface-2:#f7f4ee;
-  --ink:#171b22;
-  --muted:#69707c;
-  --line:#d8d3c8;
-  --line-dark:#b9b3a8;
-
-  --violet:#5c55c7;
-  --violet-pale:#ebe9fb;
-  --green:#23745f;
-  --green-pale:#e5f2ec;
-  --amber:#ad6918;
-  --amber-pale:#f8ecda;
-  --red:#a33f45;
-  --red-pale:#f6e5e7;
-  --blue:#315f91;
-  --blue-pale:#e5edf5;
-
-  --shadow:0 18px 50px rgba(28,31,36,.08);
-  --shadow-small:0 10px 25px rgba(28,31,36,.06);
-  --radius:22px;
-}
-
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;
-  color:var(--ink);
-  background:
-    linear-gradient(rgba(34,39,46,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34,39,46,.025) 1px, transparent 1px),
-    var(--paper);
-  background-size:32px 32px;
-  font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height:1.5;
-}
-a{color:inherit;text-decoration:none}
-button{font:inherit}
-button:focus-visible,a:focus-visible{outline:3px solid rgba(92,85,199,.22);outline-offset:3px}
-
-.progress{
-  position:fixed;z-index:80;left:0;top:0;height:3px;width:0;
-  background:linear-gradient(90deg,var(--violet),var(--green));
-}
-
-.shell{max-width:1160px;margin:auto;padding:18px 20px 48px}
-
-/* ---------- top navigation ---------- */
-.nav{
-  position:sticky;top:12px;z-index:60;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:10px 12px 10px 15px;
-  border:1px solid rgba(185,179,168,.75);
-  background:rgba(251,250,247,.88);
-  backdrop-filter:blur(16px);
-  border-radius:16px;
-  box-shadow:var(--shadow-small);
-}
-.brand{display:flex;align-items:center;gap:10px;font-weight:850;letter-spacing:-.02em}
-.brand-badge{
-  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
-  color:#fff;background:#20242c;font-weight:900;font-size:13px;
-}
-.nav-links{display:flex;gap:3px;flex-wrap:wrap}
-.nav-links a{
-  padding:8px 9px;border-radius:9px;color:var(--muted);
-  font-size:12px;font-weight:700;
-}
-.nav-links a:hover{background:#ebe8e1;color:var(--ink)}
-
-/* ---------- hero ---------- */
-.hero{
-  position:relative;overflow:hidden;
-  margin:24px 0 18px;
-  border:1px solid var(--line-dark);
-  border-radius:28px;
-  background:var(--surface);
-  box-shadow:var(--shadow);
-  display:grid;grid-template-columns:1.22fr .78fr;
-}
-.hero-main{padding:46px 42px 42px}
-.kicker{
-  display:inline-flex;align-items:center;gap:8px;
-  text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:900;
-  color:var(--violet)
-}
-.kicker:before{content:"";width:26px;height:2px;background:currentColor}
-h1{
-  margin:15px 0 14px;
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:clamp(46px,6vw,78px);
-  line-height:.96;
-  letter-spacing:-.045em;
-  font-weight:700;
-}
-.hero-copy{
-  max-width:720px;margin:0;color:#4e5663;
-  font-size:18px;line-height:1.68;
-}
-.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
-.btn{
-  border:1px solid var(--line-dark);background:transparent;color:var(--ink);
-  padding:10px 14px;border-radius:999px;font-weight:800;cursor:pointer;
-  transition:.2s ease;
-}
-.btn:hover{transform:translateY(-2px);background:#f0ece4}
-.btn.primary{background:#20242c;color:#fff;border-color:#20242c}
-.hero-side{
-  min-height:100%;
-  border-left:1px solid var(--line);
-  background:#20242c;color:#fff;
-  padding:30px 28px;
-  display:flex;flex-direction:column;justify-content:space-between;
-}
-.hero-side small{color:#b9c0ca;text-transform:uppercase;letter-spacing:.1em;font-weight:800;font-size:10px}
-.hero-side h2{
-  margin:8px 0 0;font-family:Georgia,"Times New Roman",serif;
-  font-size:28px;line-height:1.1
-}
-.hero-route{
-  margin-top:28px;display:grid;gap:10px
-}
-.hero-route-row{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
-.hero-route-row .n{
-  width:26px;height:26px;border:1px solid rgba(255,255,255,.28);
-  border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:850;
-}
-.hero-route-row strong{display:block;font-size:13px}
-.hero-route-row span{display:block;color:#b9c0ca;font-size:11px;margin-top:2px}
-.hero-note{
-  border-top:1px solid rgba(255,255,255,.15);padding-top:15px;margin-top:24px;
-  color:#c7ccd4;font-size:11.5px;line-height:1.55
-}
-
-/* ---------- generic section ---------- */
-section{margin:22px 0}
-.section-head{
-  display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start;
-  margin-bottom:12px;padding:0 4px
-}
-.section-index{
-  color:var(--muted);font-size:11px;font-weight:900;
-  letter-spacing:.12em;text-transform:uppercase;padding-top:8px
-}
-.section-head h2{
-  margin:0;font-family:Georgia,"Times New Roman",serif;
-  font-size:34px;letter-spacing:-.025em;line-height:1.08
-}
-.section-head p{margin:8px 0 0;color:var(--muted);max-width:720px;font-size:13.5px;line-height:1.62}
-.panel{
-  border:1px solid var(--line-dark);background:var(--surface);
-  border-radius:var(--radius);box-shadow:var(--shadow)
-}
-
-/* ---------- journey ---------- */
-.journey-wrap{padding:26px}
-.journey-line{
-  position:relative;
-  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
-}
-.journey-line:before{
-  content:"";position:absolute;left:8%;right:8%;top:34px;height:1px;background:var(--line-dark);z-index:0
-}
-.journey-step{
-  position:relative;z-index:1;text-align:left;
-  background:transparent;border:0;padding:0;cursor:pointer
-}
-.journey-dot{
-  width:68px;height:68px;border-radius:50%;display:grid;place-items:center;
-  border:1px solid var(--line-dark);background:var(--surface);
-  font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:700;
-  transition:.22s ease
-}
-.journey-step:hover .journey-dot,.journey-step.active .journey-dot{
-  background:#20242c;color:#fff;transform:translateY(-3px);
-  box-shadow:0 12px 25px rgba(32,36,44,.12)
-}
-.journey-step h3{margin:12px 0 4px;font-size:14px}
-.journey-step p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.4}
-.journey-detail{
-  margin-top:24px;border-top:1px solid var(--line);padding-top:20px;
-  display:grid;grid-template-columns:210px 1fr;gap:22px
-}
-.journey-detail small{
-  display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:900
-}
-.journey-detail h3{margin:6px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:25px}
-.journey-detail p{margin:0;color:#555d69;font-size:13.5px;line-height:1.68}
-.detail-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-.meta-chip{padding:6px 8px;border:1px solid var(--line);border-radius:999px;font-size:10px;font-weight:800;color:#525966;background:#f7f4ee}
-
-/* ---------- architecture ---------- */
-.arch{
-  display:grid;grid-template-columns:1fr 42px 1.2fr 42px 1fr;
-  gap:8px;align-items:center;padding:26px
-}
-.arch-col{display:grid;gap:11px}
-.arch-label{
-  text-transform:uppercase;letter-spacing:.1em;font-size:10px;font-weight:900;color:var(--muted);
-  margin-bottom:2px
-}
-.arch-box{
-  position:relative;padding:17px;border:1px solid var(--line);
-  border-radius:16px;background:#fff;min-height:112px
-}
-.arch-box h3{margin:0 0 6px;font-size:14px}
-.arch-box p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
-.arch-box.user{background:#f4f1fc;border-color:#d7d2ef}
-.arch-box.trust{background:#eef7f3;border-color:#cfe4da}
-.arch-box.control{background:#fbf1df;border-color:#e8d2ae}
-.arch-box .tag{
-  display:inline-block;margin-top:10px;padding:5px 7px;border-radius:999px;
-  border:1px solid rgba(0,0,0,.07);background:rgba(255,255,255,.65);
-  font-size:9px;font-weight:850;color:#505866
-}
-.arch-arrow{display:grid;place-items:center;color:#8f97a5;font-size:22px}
-.arch-arrow .moving{
-  width:26px;height:1px;background:var(--line-dark);position:relative
-}
-.arch-arrow .moving:after{
-  content:"";position:absolute;width:5px;height:5px;border-radius:50%;
-  background:#20242c;top:-2px;left:0;animation:slide 1.8s infinite
-}
-@keyframes slide{0%{left:0;opacity:0}20%{opacity:1}100%{left:21px;opacity:0}}
-.arch-foot{
-  padding:0 26px 26px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px
-}
-.mini-fact{
-  padding:13px 14px;border-top:2px solid #20242c;background:#f8f5ef
-}
-.mini-fact small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
-.mini-fact strong{display:block;margin-top:6px;font-size:13px}
-.mini-fact p{margin:4px 0 0;color:var(--muted);font-size:10.5px;line-height:1.45}
-
-/* ---------- flow map ---------- */
-.flow-grid{display:grid;grid-template-columns:1fr .92fr}
-.flow-list{padding:24px;border-right:1px solid var(--line)}
-.flow-row{
-  display:grid;grid-template-columns:38px 1fr auto;gap:11px;align-items:start;
-  padding:12px 0;border-bottom:1px solid var(--line)
-}
-.flow-row:last-child{border-bottom:0}
-.flow-num{
-  width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
-  border:1px solid var(--line-dark);font-size:11px;font-weight:900;background:#fff
-}
-.flow-row strong{display:block;font-size:13px;margin-top:1px}
-.flow-row p{margin:4px 0 0;color:var(--muted);font-size:11.5px;line-height:1.5}
-.flow-token{
-  align-self:center;padding:5px 7px;border-radius:999px;
-  font-size:9px;font-weight:900;letter-spacing:.04em;
-  background:#eeeae2;color:#575f6b
-}
-.flow-map{
-  padding:24px;background:#20242c;color:#fff;display:flex;flex-direction:column;justify-content:center
-}
-.flow-map small{color:#abb2bd;text-transform:uppercase;letter-spacing:.1em;font-size:10px;font-weight:900}
-.flow-map h3{font-family:Georgia,"Times New Roman",serif;margin:7px 0 18px;font-size:24px}
-.flow-chain{display:grid;gap:8px}
-.chain-row{
-  display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
-  padding:11px 12px;border:1px solid rgba(255,255,255,.16);border-radius:12px;
-  background:rgba(255,255,255,.04)
-}
-.chain-row strong{font-size:12px}
-.chain-row span{font-size:10px;color:#b9c0ca}
-.chain-arrow{padding-left:12px;color:#8f98a7;font-size:14px}
-.flow-result{
-  margin-top:15px;padding:13px;border-radius:12px;
-  background:#f0e5ce;color:#73500f;font-size:11.5px;line-height:1.5
-}
-
-/* ---------- receipt anatomy ---------- */
-.receipt-layout{display:grid;grid-template-columns:1.06fr .94fr}
-.receipt-card{
-  margin:24px;border:1px solid #a9a398;background:#fff;
-  box-shadow:0 14px 35px rgba(28,31,36,.09);
-  position:relative
-}
-.receipt-card:before,.receipt-card:after{
-  content:"";position:absolute;left:0;right:0;height:9px;
-  background:repeating-linear-gradient(90deg,#fff 0 10px,transparent 10px 16px)
-}
-.receipt-card:before{top:-1px}.receipt-card:after{bottom:-1px}
-.receipt-head{
-  padding:22px 22px 16px;border-bottom:1px dashed #b8b2a7;
-  display:flex;justify-content:space-between;gap:16px
-}
-.receipt-head h3{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:25px}
-.receipt-head span{font-size:10px;color:var(--muted)}
-.receipt-body{padding:18px 22px}
-.receipt-row{
-  display:grid;grid-template-columns:145px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid #eeeae2;
-  cursor:pointer
-}
-.receipt-row:hover{background:#faf8f4}
-.receipt-row:last-child{border-bottom:0}
-.receipt-key{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:#7a8089}
-.receipt-value{font-size:12px;color:#39414d}
-.receipt-value code{font-size:10.5px;word-break:break-all}
-.receipt-side{
-  border-left:1px solid var(--line);padding:24px;background:#f8f5ef
-}
-.receipt-side h3{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:25px}
-.receipt-side p{margin:8px 0 16px;color:var(--muted);font-size:12.5px;line-height:1.6}
-.receipt-explain{
-  padding:14px;border-left:3px solid var(--violet);background:#fff;margin-top:10px
-}
-.receipt-explain small{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:9px;color:var(--muted);font-weight:900}
-.receipt-explain strong{display:block;margin-top:5px;font-size:13px}
-.receipt-explain p{margin:5px 0 0;font-size:11.5px;color:var(--muted)}
-
-/* ---------- trust/tamper lab ---------- */
-.trust-grid{display:grid;grid-template-columns:.9fr 1.1fr}
-.trust-copy{padding:26px;border-right:1px solid var(--line)}
-.trust-copy h3{font-family:Georgia,"Times New Roman",serif;margin:0;font-size:27px}
-.trust-copy p{color:var(--muted);font-size:12.5px;line-height:1.65}
-.trust-steps{display:grid;gap:9px;margin-top:17px}
-.trust-step{display:grid;grid-template-columns:28px 1fr;gap:9px}
-.trust-step .n{
-  width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
-  background:#20242c;color:#fff;font-size:10px;font-weight:900
-}
-.trust-step strong{display:block;font-size:12px}
-.trust-step span{display:block;color:var(--muted);font-size:10.8px;margin-top:2px}
-.lab{padding:26px;background:#f8f5ef}
-.lab-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.lab-top h3{margin:0;font-size:15px}
-.status{
-  padding:6px 8px;border-radius:999px;font-size:9px;font-weight:900;letter-spacing:.06em;
-  background:var(--green-pale);color:var(--green)
-}
-.status.bad{background:var(--red-pale);color:var(--red)}
-.lab-screen{
-  border:1px solid var(--line-dark);background:#20242c;color:#dce1e7;border-radius:16px;padding:16px;
-  font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:11px;line-height:1.65;
-  min-height:185px
-}
-.lab-line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);padding:7px 0}
-.lab-line:last-child{border-bottom:0}
-.lab-line span:first-child{color:#aab3bf}
-.lab-line span:last-child{text-align:right}
-.lab-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.lab-btn{
-  border:1px solid var(--line-dark);background:#fff;padding:9px 11px;border-radius:10px;font-size:11px;font-weight:850;cursor:pointer
-}
-.lab-btn:hover{background:#eee9e0}
-.lab-message{
-  margin-top:12px;padding:12px;border-radius:12px;background:var(--green-pale);color:#2e6657;
-  font-size:11.5px;line-height:1.5
-}
-.lab-message.bad{background:var(--red-pale);color:#7f3940}
-
-/* ---------- human review ---------- */
-.review{padding:26px}
-.review-track{
-  display:grid;grid-template-columns:1fr 50px 1fr 50px 1fr;gap:8px;align-items:center
-}
-.review-box{
-  padding:18px;border:1px solid var(--line);border-radius:16px;background:#fff;min-height:130px
-}
-.review-box h3{margin:0;font-size:14px}
-.review-box p{margin:6px 0 0;color:var(--muted);font-size:11.5px;line-height:1.5}
-.review-box.human{background:var(--amber-pale);border-color:#e5c59b}
-.review-box.next{background:var(--green-pale);border-color:#c9e3da}
-.review-arrow{text-align:center;color:#8f97a4;font-size:21px}
-.review-note{
-  margin-top:15px;padding:13px 15px;border-top:1px solid var(--line);
-  color:#59616c;font-size:11.5px;line-height:1.55
-}
-
-/* ---------- feature strip ---------- */
-.features{display:grid;grid-template-columns:repeat(3,1fr)}
-.feature{
-  padding:18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)
-}
-.feature:nth-child(3n){border-right:0}
-.feature:nth-last-child(-n+3){border-bottom:0}
-.feature small{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:900}
-.feature h3{margin:6px 0 5px;font-size:13px}
-.feature p{margin:0;color:var(--muted);font-size:11px;line-height:1.48}
-
-/* ---------- accordion ---------- */
-.accordion{padding:20px}
-.acc{border-bottom:1px solid var(--line)}
-.acc:last-child{border-bottom:0}
-.acc-btn{
-  width:100%;border:0;background:transparent;padding:14px 2px;display:flex;justify-content:space-between;align-items:center;gap:12px;
-  text-align:left;cursor:pointer;font-weight:850;color:var(--ink)
-}
-.acc-btn span:last-child{color:#8d95a0}
-.acc-content{max-height:0;overflow:hidden;transition:max-height .3s ease}
-.acc.open .acc-content{max-height:190px}
-.acc-content p{margin:0 0 15px;color:var(--muted);font-size:11.8px;line-height:1.62}
-
-/* ---------- footer ---------- */
-.footer{
-  padding:28px 4px 4px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;
-  color:var(--muted);font-size:11px
-}
-
-@media(max-width:960px){
-  .hero{grid-template-columns:1fr}.hero-side{border-left:0;border-top:1px solid var(--line)}
-  .section-head{grid-template-columns:1fr;gap:4px}
-  .arch{grid-template-columns:1fr}.arch-arrow{transform:rotate(90deg)}
-  .arch-foot{grid-template-columns:1fr 1fr}
-  .flow-grid,.receipt-layout,.trust-grid{grid-template-columns:1fr}
-  .flow-list,.trust-copy{border-right:0;border-bottom:1px solid var(--line)}
-  .receipt-side{border-left:0;border-top:1px solid var(--line)}
-  .features{grid-template-columns:1fr 1fr}.feature:nth-child(3n){border-right:1px solid var(--line)}
-  .feature:nth-child(2n){border-right:0}
-}
-@media(max-width:700px){
-  .shell{padding:12px 12px 36px}.nav-links{display:none}
-  .hero-main{padding:30px 24px}.hero-side{padding:24px}
-  h1{font-size:48px}.hero-copy{font-size:16px}
-  .journey-line{grid-template-columns:1fr}.journey-line:before{display:none}
-  .journey-step{display:grid;grid-template-columns:58px 1fr;column-gap:12px}
-  .journey-dot{width:58px;height:58px;grid-row:1/3}
-  .journey-step h3{margin:4px 0 2px}.journey-step p{margin:0}
-  .journey-detail{grid-template-columns:1fr}
-  .arch-foot{grid-template-columns:1fr}
-  .review-track{grid-template-columns:1fr}.review-arrow{transform:rotate(90deg)}
-  .features{grid-template-columns:1fr}.feature,.feature:nth-child(3n),.feature:nth-child(2n){border-right:0}
-  .feature:nth-last-child(-n+3){border-bottom:1px solid var(--line)}.feature:last-child{border-bottom:0}
-  .receipt-row{grid-template-columns:1fr;gap:3px}
-}
-</style>
-</head>
-
-<body>
-<div class="progress" id="progress"></div>
-
-<div class="shell">
-  <nav class="nav">
-    <div class="brand">
-      <div class="brand-badge">R</div>
-      <span>RAMIFY OS · Behind the Decision</span>
-    </div>
-    <div class="nav-links">
-      <a href="#journey">Journey</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#flow">Data Flow</a>
-      <a href="#receipt">Receipt</a>
-      <a href="#trust">Verification</a>
-      <a href="#review">Human Review</a>
-    </div>
+    <a href="#overview">Overview</a><a href="#journey">The journey</a><a href="#evidence">Evidence checks</a><a href="#scenarios">Decision explorer</a><a href="#receipts">Receipts</a><a href="#lab">Verification</a><a href="#review">Human review</a><a href="#architecture">Architecture</a><a href="#proof">Proof &amp; scope</a><a href="#faq">FAQs</a>
   </nav>
-
-  <header class="hero">
-    <div class="hero-main">
-      <div class="kicker">Technical companion to the project poster</div>
-      <h1>What happens behind a RAMIFY decision?</h1>
-      <p class="hero-copy">
-        The poster gives the short version. This page shows the machinery underneath:
-        how a decision moves through RAMIFY, how evidence is linked, how a Decision Receipt
-        is created, and what must be checked before an action is allowed.
-      </p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#journey">Follow one decision</a>
-        <a class="btn" href="#trust">Try the tamper check</a>
+</header>
+<main id="main">
+<div class="wrap" id="top">
+  <noscript><div class="no-script">This guide is readable without JavaScript. Enable JavaScript to switch journey steps, compare scenarios and use the fingerprint lab.</div></noscript>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> Evidence first. Accountable action.</div>
+        <h1 id="hero-title">Every decision.<br>Every reason.<br><em>A record to prove it.</em></h1>
+        <p class="hero-copy">Before an AI agent acts, RAMIFY checks the product evidence, applies the buyer’s rules and records the result in a verifiable Decision Receipt.</p>
+        <div class="actions"><a class="btn" href="#journey">Follow a decision <span aria-hidden="true">↗</span></a><a class="btn secondary" href="#scenarios">Explore the outcomes <span aria-hidden="true">→</span></a></div>
+        <p class="hero-foot"><span class="dot" aria-hidden="true"></span> University of Tasmania · KIT300 capstone prototype</p>
+      </div>
+      <div class="hero-visual" aria-label="Illustrated journey from request to evidence to a Decision Receipt">
+        <div class="visual-top"><span>THE DECISION TRAIL</span><b>SYNTHETIC DEMO</b></div>
+        <div class="visual-route" aria-hidden="true"><div class="route-stop"><b>01</b><span>Request</span></div><div class="route-stop"><b>02</b><span>Evidence</span></div><div class="route-stop"><b>03</b><span>Policy</span></div><div class="route-stop"><b>✓</b><span>Receipt</span></div></div>
+        <div class="mini-receipt">
+          <div class="mini-label"><span>RAMIFY / DECISION RECEIPT</span><svg class="receipt-symbol" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 6v6c0 5 8 10 8 10s8-5 8-10V6l-8-4Z" stroke="currentColor" stroke-width="1.4"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="1.4"/></svg></div>
+          <h3>Apex Magnesium Glycinate</h3><div class="mini-sub">Clean evidence · Consumer shopping agent</div>
+          <div class="mini-row"><span>Product assessment</span><span class="pill">✓ Approved</span></div>
+          <div class="mini-row"><span>Agent decision</span><strong>allow</strong></div>
+          <div class="mini-row"><span>Next permitted step</span><strong>Add to mock cart</strong></div>
+          <div class="receipt-stamp"><span aria-hidden="true">⌁</span> SHA-256 fingerprint + Ed25519 signature</div>
+        </div>
+        <p class="visual-caption">Receipt illustration · an approved result is not a purchase.</p>
       </div>
     </div>
-
-    <aside class="hero-side">
-      <div>
-        <small>The short version</small>
-        <h2>A decision is not trusted just because a button was clicked.</h2>
-        <div class="hero-route">
-          <div class="hero-route-row"><div class="n">1</div><div><strong>Understand the need</strong><span>Identify the decision and its context.</span></div></div>
-          <div class="hero-route-row"><div class="n">2</div><div><strong>Record the choice</strong><span>Keep the decision and supporting evidence together.</span></div></div>
-          <div class="hero-route-row"><div class="n">3</div><div><strong>Verify the record</strong><span>Check integrity and signature before action.</span></div></div>
-        </div>
-      </div>
-      <div class="hero-note">Local-first demo · FastAPI workflow · Decision Receipts · SHA-256 · Ed25519 · human review · Action Gate</div>
-    </aside>
-  </header>
-
-  <section id="journey">
-    <div class="section-head">
-      <div class="section-index">01 · User journey</div>
-      <div>
-        <h2>The five stages the user sees</h2>
-        <p>The experience stays simple on purpose. Click a stage to see what RAMIFY is doing at that point.</p>
-      </div>
-    </div>
-
-    <div class="panel journey-wrap">
-      <div class="journey-line">
-        <button class="journey-step active"
-          data-title="Identify"
-          data-copy="The user explains the situation and what they are trying to decide. RAMIFY captures enough context to frame the decision before presenting choices."
-          data-meta="Need|Context|Starting point">
-          <div class="journey-dot">01</div><h3>Identify</h3><p>What are we trying to decide?</p>
-        </button>
-
-        <button class="journey-step"
-          data-title="Resolve"
-          data-copy="The user explores available paths, trade-offs and supporting information. The aim is to make the choice visible rather than hide it behind a black-box answer."
-          data-meta="Options|Trade-offs|Guidance">
-          <div class="journey-dot">02</div><h3>Resolve</h3><p>What are the realistic options?</p>
-        </button>
-
-        <button class="journey-step"
-          data-title="Status"
-          data-copy="RAMIFY shows the current decision state: what has been selected, what is still missing, and whether the decision is ready to move forward."
-          data-meta="Current state|Readiness|Missing items">
-          <div class="journey-dot">03</div><h3>Status</h3><p>Is the decision ready?</p>
-        </button>
-
-        <button class="journey-step"
-          data-title="Verify"
-          data-copy="The system checks the evidence and the Decision Receipt. It confirms that the record has not changed and that its digital signature is valid."
-          data-meta="Evidence|Integrity|Signature">
-          <div class="journey-dot">04</div><h3>Verify</h3><p>Can the record be trusted?</p>
-        </button>
-
-        <button class="journey-step"
-          data-title="Assess"
-          data-copy="The result is shown in a form that can be reviewed later. The user can see the outcome, the decision trail and the receipt that supports it."
-          data-meta="Outcome|Review|Audit trail">
-          <div class="journey-dot">05</div><h3>Assess</h3><p>What happened, and why?</p>
-        </button>
-      </div>
-
-      <div class="journey-detail">
-        <div>
-          <small>Selected stage</small>
-          <h3 id="journeyTitle">Identify</h3>
-          <div class="detail-meta" id="journeyMeta">
-            <span class="meta-chip">Need</span><span class="meta-chip">Context</span><span class="meta-chip">Starting point</span>
-          </div>
-        </div>
-        <p id="journeyCopy">The user explains the situation and what they are trying to decide. RAMIFY captures enough context to frame the decision before presenting choices.</p>
-      </div>
+    <div class="metrics" aria-label="Packaged demonstration scope">
+      <div class="metric"><strong>12</strong><span>Synthetic products<br>across 2 categories</span></div><div class="metric"><strong>7</strong><span>Deterministic<br>evidence checks</span></div><div class="metric"><strong>5</strong><span>Configurable<br>agent profiles</span></div><div class="metric"><strong>17</strong><span>Named scenarios<br>in the seed dataset</span></div>
     </div>
   </section>
 
-  <section id="architecture">
-    <div class="section-head">
-      <div class="section-index">02 · Architecture</div>
-      <div>
-        <h2>Three layers, one decision trail</h2>
-        <p>This is the practical system view: the interface the user sees, the decision logic behind it, and the trust controls that sit before the final action.</p>
-      </div>
+  <section class="section" id="overview" aria-labelledby="overview-title">
+    <div class="section-head"><div><p class="eyebrow">01 / The idea</p><h2 id="overview-title">Confidence needs<br>something behind it.</h2></div><p>An agent can recommend a product convincingly. RAMIFY asks the next question: what evidence supports that recommendation, and is this agent actually allowed to act?</p></div>
+    <div class="grid3">
+      <article class="card"><div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H9l-5 4V5Z" stroke="currentColor" stroke-width="1.5"/><path d="M8 9h8M8 12h5" stroke="currentColor" stroke-width="1.5"/></svg></div><h3>Understand the request</h3><p>An optional local language model helps interpret free-form requests and explain completed results. Product trust is determined by explicit rules and evidence.</p></article>
+      <article class="card"><div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z" stroke="currentColor" stroke-width="1.5"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="1.5"/></svg></div><h3>Check before acting</h3><p>Identity, batch standing, seller authority, evidence and claims are assessed consistently. Buyer policy can add restrictions, while hard stops remain in force.</p></article>
+      <article class="card"><div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l4 4v14H6V3Z" stroke="currentColor" stroke-width="1.5"/><path d="M14 3v5h5M9 12h7M9 16h5" stroke="currentColor" stroke-width="1.5"/></svg></div><h3>Keep the reasoning</h3><p>A sealed receipt connects the product, checks, policy, reasons and permitted actions. Later review and simulated transactions remain linked to their supporting records.</p></article>
     </div>
+    <div class="callout"><span class="eyebrow">The central distinction</span><p><strong>“What does the evidence say about this product?”</strong> and <strong>“What may this buyer do?”</strong> are recorded separately. The same product facts can support different buyer actions.</p></div>
+  </section>
 
-    <div class="panel">
-      <div class="arch">
-        <div class="arch-col">
-          <div class="arch-label">Experience layer</div>
-          <div class="arch-box user">
-            <h3>RAMIFY Interface</h3>
-            <p>Guides the user through Identify, Resolve, Status, Verify and Assess.</p>
-            <span class="tag">Frontend</span>
-          </div>
-          <div class="arch-box">
-            <h3>Guided Tour & Personas</h3>
-            <p>Helps first-time users understand the journey and keeps different roles visually clear.</p>
-          </div>
-        </div>
-
-        <div class="arch-arrow"><div class="moving"></div></div>
-
-        <div class="arch-col">
-          <div class="arch-label">Decision layer</div>
-          <div class="arch-box">
-            <h3>FastAPI Application</h3>
-            <p>Receives requests, validates data, updates state and coordinates the workflow.</p>
-            <span class="tag">127.0.0.1 demo</span>
-          </div>
-          <div class="arch-box user">
-            <h3>Decision Logic</h3>
-            <p>Keeps track of options, current status, readiness and the information used to reach the choice.</p>
-          </div>
-          <div class="arch-box trust">
-            <h3>Evidence + Decision Receipt</h3>
-            <p>Links supporting information to a record of the decision so the trail can be checked later.</p>
-          </div>
-        </div>
-
-        <div class="arch-arrow"><div class="moving"></div></div>
-
-        <div class="arch-col">
-          <div class="arch-label">Trust & control layer</div>
-          <div class="arch-box trust">
-            <h3>Receipt Verifier</h3>
-            <p>Checks the SHA-256 digest and the Ed25519 signature.</p>
-            <span class="tag">Integrity + authenticity</span>
-          </div>
-          <div class="arch-box control">
-            <h3>Action Gate</h3>
-            <p>Allows, blocks or redirects the action depending on whether the required signed receipt is valid.</p>
-          </div>
-        </div>
+  <section class="section" id="journey" aria-labelledby="journey-title">
+    <div class="section-head"><div><p class="eyebrow">02 / Follow the evidence</p><h2 id="journey-title">Five primitives.<br>One traceable journey.</h2></div><p>Follow a clean Apex product example through the source implementation. Select a step to see its input, purpose and output. The seven detailed checks sit inside Verify.</p></div>
+    <div class="journey-shell">
+      <div class="journey-tabs" role="tablist" aria-label="Five decision primitives">
+        <button class="journey-tab" id="tab-identify" role="tab" aria-selected="true" aria-controls="journey-panel" data-step="0"><span class="step">01</span><strong>Identify</strong></button>
+        <button class="journey-tab" id="tab-resolve" role="tab" aria-selected="false" aria-controls="journey-panel" tabindex="-1" data-step="1"><span class="step">02</span><strong>Resolve</strong></button>
+        <button class="journey-tab" id="tab-status" role="tab" aria-selected="false" aria-controls="journey-panel" tabindex="-1" data-step="2"><span class="step">03</span><strong>Status</strong></button>
+        <button class="journey-tab" id="tab-verify" role="tab" aria-selected="false" aria-controls="journey-panel" tabindex="-1" data-step="3"><span class="step">04</span><strong>Verify</strong></button>
+        <button class="journey-tab" id="tab-assess" role="tab" aria-selected="false" aria-controls="journey-panel" tabindex="-1" data-step="4"><span class="step">05</span><strong>Assess</strong></button>
       </div>
-
-      <div class="arch-foot">
-        <div class="mini-fact"><small>Interface</small><strong>Simple by design</strong><p>The complexity stays behind the screen.</p></div>
-        <div class="mini-fact"><small>Evidence</small><strong>Linked, not hidden</strong><p>Important inputs remain part of the trail.</p></div>
-        <div class="mini-fact"><small>Receipt</small><strong>Reviewable record</strong><p>The outcome is not just a transient screen state.</p></div>
-        <div class="mini-fact"><small>Action</small><strong>Gated by verification</strong><p>A valid receipt is part of the control path.</p></div>
+      <div class="journey-content" id="journey-panel" role="tabpanel" aria-labelledby="tab-identify" tabindex="0">
+        <div class="journey-description"><span class="micro-label" id="journey-kicker">01 / Establish identity</span><h3 id="journey-heading">Start with the right product.</h3><p id="journey-copy">Map the selected product or supplied identifier to one known subject. Ambiguous or unresolved input must remain unresolved; the system cannot safely borrow another product’s evidence.</p><p class="source-note" id="journey-source">Source: <code>resolve/primitives.py · identify()</code></p></div>
+        <div class="io-block"><div class="io-row"><small>Input</small><p id="journey-input">Apex Magnesium Glycinate product selection.</p></div><div class="io-row"><small>What happens</small><p id="journey-operation">Resolve a known identifier to a single catalogue subject.</p></div><div class="io-row"><small>Output</small><p id="journey-output"><code>ramify:demo:supp:apex-mg-glyc-120</code></p></div></div>
       </div>
+      <div class="boundary-note"><strong>After evaluation:</strong> the Action Gate selects an allowed next step, then the complete machine receipt is sealed and stored. A later action request re-verifies the receipt before using its authority.</div>
     </div>
   </section>
 
-  <section id="flow">
-    <div class="section-head">
-      <div class="section-index">03 · Data flow</div>
-      <div>
-        <h2>What moves through the system?</h2>
-        <p>Rather than treating the process as one large black box, RAMIFY separates the user’s input, decision state, evidence, receipt and verification result.</p>
+  <section class="section" id="evidence" aria-labelledby="evidence-title">
+    <div class="section-head"><div><p class="eyebrow">03 / Inside RATIFY</p><h2 id="evidence-title">Seven questions<br>behind the outcome.</h2></div><p>RATIFY evaluates the evidence against the packaged demonstration policy. Each check records its finding and reason; a primary reason never erases the other findings.</p></div>
+    <div class="checks">
+      <article class="check"><span class="check-num">01</span><div><h3>Identity resolution</h3><p>Does the identifier resolve to exactly one known subject? An unresolved identity is <strong>incomplete</strong>, so the system cannot treat it as a clean assessment.</p></div></article>
+      <article class="check"><span class="check-num">02</span><div><h3>Recall &amp; advisory standing</h3><p>Check the applicable product or batch status. An <strong>active recall blocks</strong> action; an active advisory routes the case to review.</p></div></article>
+      <article class="check"><span class="check-num">03</span><div><h3>Seller authority</h3><p>Is the seller authorised for the category? Revoked authority is a hard stop. Unverified authority is recorded as a finding without inventing an allegation.</p></div></article>
+      <article class="check"><span class="check-num">04</span><div><h3>Mandatory evidence</h3><p>Are the evidence types required by this category present? Missing documents remain <strong>missing information</strong>; absence cannot count as a pass.</p></div></article>
+      <article class="check"><span class="check-num">05</span><div><h3>Evidence validity &amp; integrity</h3><p>Check dates and record status, hash the actual artefact bytes, verify issuer signatures and check the signed binding between evidence and the assessed subject.</p></div></article>
+      <article class="check"><span class="check-num">06</span><div><h3>Claims &amp; category requirements</h3><p>Check required claims, their status and the issuer’s authority to make them. Claims must be backed by the relevant evidence; rejected or revoked claims can force a stop.</p></div></article>
+      <article class="check"><span class="check-num">07</span><div><h3>Conflicting information</h3><p>Compare material claims from different issuers. A conflict is retained for review. The demo’s EPA/DHA comparison uses a 5 mg tolerance per component; other ingredient formats use normalised comparison.</p></div></article>
+    </div>
+    <div class="detail-strip"><div><h4>Integrity: have the bytes changed?</h4><p>A matching hash and valid issuer signature support the authenticity of the recorded artefact. Signed metadata binds it to the relevant subject, scope and claims.</p></div><div><h4>Validity: is this evidence usable?</h4><p>An intact document may still be expired, withdrawn, not yet in effect or irrelevant to this batch. Cryptographic integrity alone does not make it valid evidence.</p></div></div>
+    <p class="source-note">Source: <code>policy_pack_demo_v1.json</code>, <code>ratify/checks.py</code> and <code>ratify/evidence_binding.py</code>. These are simplified demonstration rules.</p>
+  </section>
+
+  <section class="section" id="scenarios" aria-labelledby="scenarios-title">
+    <div class="section-head"><div><p class="eyebrow">04 / Interactive decision explorer</p><h2 id="scenarios-title">Same product truth.<br>Different permissions.</h2></div><p>Compare expected outcomes from the supplied seed scenarios. These examples explain the packaged rules; this page does not call the live engine or initiate a transaction.</p></div>
+    <div class="scenario-layout">
+      <div class="scenario-controls"><label for="scenario-select">Choose an evidence story</label><select id="scenario-select"><option value="clean">01 · Clean evidence</option><option value="vendor" selected>02 · Buyer’s vendor restriction</option><option value="expired">03 · Expired certificate</option><option value="advisory">04 · Active advisory</option><option value="recall">05 · Active recall</option><option value="missing">06 · Missing evidence</option></select><p>The comparison uses the built-in Consumer and Enterprise procurement profiles.</p><div class="scenario-legend"><div><span class="legend-mark"></span>Approved</div><div><span class="legend-mark amber"></span>Warning or review</div><div><span class="legend-mark red"></span>Rejected</div></div><p><strong>Snapshot:</strong> 24 July 2026<br>All products and evidence are synthetic.</p></div>
+      <div class="scenario-content" id="scenario-panel" aria-live="polite" aria-atomic="true">
+        <div class="scenario-title-row"><div><span class="micro-label" id="scenario-id">PROOF-CONSUMER-001 / PROOF-PROCUREMENT-001</span><h3 id="scenario-name">Northbeam Vitamin C</h3></div><span class="pill info" id="scenario-tag">Policy difference</span></div>
+        <p class="scenario-description" id="scenario-description">The evidence passes and the seller is authorised. That seller is absent from the enterprise buyer’s approved vendor list.</p>
+        <div class="truth-panel"><div><small>Objective product assessment · same for both actors</small><code id="objective-code">allow</code></div><span class="pill" id="objective-label">Approved</span></div>
+        <div class="actor-comparison"><div class="actor"><h4>Consumer shopping agent</h4><span class="pill" id="consumer-result">Approved · allow</span><p id="consumer-copy">May add the item to the mock cart. The person still controls checkout; this profile does not buy unattended.</p></div><div class="actor"><h4>Enterprise procurement agent</h4><span class="pill warn" id="procurement-result">Human review · hold</span><p id="procurement-copy">The approved-vendor restriction narrows the actor decision to hold. The product’s objective assessment stays allow.</p></div></div>
+        <p class="scenario-takeaway" id="scenario-takeaway"><strong>What this demonstrates:</strong> a commercial constraint changes the permitted action without rewriting the product evidence.</p>
       </div>
     </div>
+    <div class="table-wrap"><table><caption>Five precise outcomes — colour is only a presentation aid</caption><thead><tr><th scope="col">Machine posture</th><th scope="col">Meaning</th><th scope="col">Action consequence</th></tr></thead><tbody>
+      <tr><td><code>allow</code></td><td>Checks satisfied; no warning.</td><td>Only the actions granted to this actor may proceed.</td></tr><tr><td><code>allow_with_warning</code></td><td>Approved with a recorded finding.</td><td>Show the finding. Actor policy may narrow it to review.</td></tr><tr><td><code>hold</code></td><td>A reviewable condition needs a person.</td><td>Pause automated buying; open a review where permitted.</td></tr><tr><td><code>escalate</code></td><td>Too little information to judge.</td><td>Stop. Incomplete evidence does not grant purchase authority.</td></tr><tr><td><code>block</code></td><td>A hard-stop condition is present.</td><td>Halt. Agent settings and human approval cannot soften it.</td></tr>
+    </tbody></table></div>
+    <details class="policy-details"><summary>Meet the five built-in agent profiles</summary><div class="details-body"><p>These are the shipped defaults. The full application lets a user edit settings; the permitted actions and narrowing rules are derived from those settings.</p><div class="policy-grid"><div class="policy-mini"><strong>Consumer</strong><p>Shows warnings and assists the shopper. No unattended purchase.</p></div><div class="policy-mini"><strong>Autonomous buyer</strong><p>Clean results only, with a default A$50 ceiling per line. Warned results need review.</p></div><div class="policy-mini"><strong>Budget-controlled</strong><p>Default A$30 ceiling per line. A sound product can still exceed the buyer’s budget.</p></div><div class="policy-mini"><strong>Brand-restricted</strong><p>Apex Nutrients and Stonefield are on the default brand list. Other brands go to review.</p></div><div class="policy-mini"><strong>Enterprise procurement</strong><p>Approved vendors only. Warnings need review. Stages requisitions rather than consumer checkout.</p></div></div><p class="source-note">Source: <code>data/demo_seed.json</code> and <code>policy/profiles.py</code>. Policy may only keep or increase restrictiveness.</p></div></details>
+  </section>
 
-    <div class="panel flow-grid">
-      <div class="flow-list">
-        <div class="flow-row">
-          <div class="flow-num">1</div>
-          <div><strong>User context enters the system</strong><p>The need, persona, choice and relevant inputs are captured.</p></div>
-          <span class="flow-token">INPUT</span>
-        </div>
-        <div class="flow-row">
-          <div class="flow-num">2</div>
-          <div><strong>Decision state is updated</strong><p>RAMIFY tracks the selected path, current status and any missing requirement.</p></div>
-          <span class="flow-token">STATE</span>
-        </div>
-        <div class="flow-row">
-          <div class="flow-num">3</div>
-          <div><strong>Evidence is linked</strong><p>Supporting artefacts and references stay connected to the decision.</p></div>
-          <span class="flow-token">EVIDENCE</span>
-        </div>
-        <div class="flow-row">
-          <div class="flow-num">4</div>
-          <div><strong>A Decision Receipt is built</strong><p>The important decision details are placed into one reviewable record.</p></div>
-          <span class="flow-token">RECEIPT</span>
-        </div>
-        <div class="flow-row">
-          <div class="flow-num">5</div>
-          <div><strong>The receipt is verified</strong><p>The content fingerprint and the digital signature are checked.</p></div>
-          <span class="flow-token">VERIFY</span>
-        </div>
-        <div class="flow-row">
-          <div class="flow-num">6</div>
-          <div><strong>The Action Gate decides what happens next</strong><p>Proceed, stop, or send the case to human review.</p></div>
-          <span class="flow-token">GATE</span>
-        </div>
-      </div>
-
-      <div class="flow-map">
-        <small>One-line system view</small>
-        <h3>Decision → record → verification → controlled action</h3>
-        <div class="flow-chain">
-          <div class="chain-row"><strong>User / Interface</strong><span>need + choice</span></div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-row"><strong>Decision State</strong><span>status + readiness</span></div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-row"><strong>Evidence Package</strong><span>supporting information</span></div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-row"><strong>Decision Receipt</strong><span>decision record</span></div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-row"><strong>Verification</strong><span>hash + signature</span></div>
-          <div class="chain-arrow">↓</div>
-          <div class="chain-row"><strong>Action Gate</strong><span>allow / block / review</span></div>
-        </div>
-        <div class="flow-result">The main idea: the final action is separated from the earlier decision steps. That creates a clear place to perform trust checks.</div>
-      </div>
+  <section class="section" id="receipts" aria-labelledby="receipts-title">
+    <div class="section-head"><div><p class="eyebrow">05 / A decision you can inspect</p><h2 id="receipts-title">The reasoning travels<br>with the receipt.</h2></div><p>The complete record is assembled before sealing. Select a field group to understand what it preserves. The specimen below is an explanatory excerpt, not a signed receipt.</p></div>
+    <div class="receipt-layout">
+      <div class="receipt-full"><div class="receipt-title"><span class="micro-label">Machine receipt / schema 0.4</span><h3>Decision Receipt</h3><small>Illustrative field values · full records contain additional fields</small></div><div class="receipt-fields" aria-label="Receipt field explanations">
+        <button class="receipt-field" data-field="identity" aria-pressed="true" aria-controls="receipt-explanation"><span>Identity &amp; context</span><code>subject_ref · assessment_context</code></button>
+        <button class="receipt-field" data-field="evidence" aria-pressed="false" aria-controls="receipt-explanation"><span>Evidence &amp; snapshot</span><code>check_results · dataset_digest</code></button>
+        <button class="receipt-field" data-field="policy" aria-pressed="false" aria-controls="receipt-explanation"><span>Policy &amp; actor</span><code>policy_digest · actor_ref</code></button>
+        <button class="receipt-field" data-field="outcome" aria-pressed="false" aria-controls="receipt-explanation"><span>Two distinct outcomes</span><code>objective_posture: allow<br>actor_decision: hold</code></button>
+        <button class="receipt-field" data-field="action" aria-pressed="false" aria-controls="receipt-explanation"><span>Reasons &amp; actions</span><code>reason_codes · permitted_actions</code></button>
+        <button class="receipt-field" data-field="time" aria-pressed="false" aria-controls="receipt-explanation"><span>Time &amp; lineage</span><code>expires_at · supersedes_receipt</code></button>
+        <button class="receipt-field" data-field="seal" aria-pressed="false" aria-controls="receipt-explanation"><span>Cryptographic seal</span><code>payload_hash · signature</code></button>
+      </div><div class="receipt-footer">The machine posture is recorded in the receipt. Traffic-light colour is derived for the interface.</div></div>
+      <div><div class="receipt-explain" id="receipt-explanation" aria-live="polite" aria-atomic="true"><span class="micro-label" id="field-kicker">Identity &amp; context</span><h3 id="field-title">Which decision is this?</h3><p id="field-copy">receipt_id names the record; subject_ref identifies the product. assessment_context distinguishes a decision from a purchase assessment, so an old browsing result cannot silently become checkout authority.</p></div>
+      <div class="signing-steps"><div class="sign-step"><b>1</b><div><h4>Canonicalise the payload</h4><p>Sort JSON keys; use compact UTF-8 encoding. Exclude only <code>payload_hash</code> and <code>signature</code>. Floating-point values are rejected; money uses integer cents.</p></div></div><div class="sign-step"><b>2</b><div><h4>Hash the canonical bytes</h4><p>Compute SHA-256 and store <code>sha256:</code> followed by the 64-character hexadecimal digest.</p></div></div><div class="sign-step"><b>3</b><div><h4>Sign the digest</h4><p>The backend signs the raw 32-byte digest with Ed25519 and stores the signature in Base64. Verification needs trusted public-key material.</p></div></div></div>
+      <p class="source-note">Source: <code>receipt/builder.py</code>, <code>crypto/canonical.py</code> and <code>crypto/sign.py</code>.</p></div>
     </div>
   </section>
 
-  <section id="receipt">
-    <div class="section-head">
-      <div class="section-index">04 · Decision Receipt</div>
-      <div>
-        <h2>The receipt is the audit trail</h2>
-        <p>A Decision Receipt is easier to understand if you think of it like a structured record of “what was decided, what supported it, and how we can verify it later.” Click a field to see why it matters.</p>
-      </div>
+  <section class="section" id="lab" aria-labelledby="lab-title">
+    <div class="section-head"><div><p class="eyebrow">06 / Try it yourself</p><h2 id="lab-title">A small edit.<br>A different fingerprint.</h2></div><p>This browser lab computes real SHA-256 hashes. Change the sample quantity or edit the JSON to see whether its canonical content still matches the original.</p></div>
+    <div class="lab-shell"><div class="lab-intro"><span class="eyebrow">Interactive / runs locally</span><h3>Can you change the record without changing its hash?</h3><p>Start with a small illustrative payload. The original fingerprint is the reference. When the content changes, the recomputed fingerprint changes too.</p><p>Try changing <code>quantity</code> from 1 to 2. Then restore it. Reordering keys or adding spaces leaves the canonical JSON unchanged.</p><p class="lab-disclaimer"><strong>What this lab proves:</strong> content comparison using SHA-256. It does not create a RAMIFY receipt, verify Ed25519 signatures, run evidence checks or grant action authority.</p></div>
+      <div class="lab-area"><label for="lab-payload">ILLUSTRATIVE JSON · NOT SIGNED</label><textarea id="lab-payload" spellcheck="false" aria-describedby="lab-help">{
+  "subject_ref": "ramify:demo:supp:apex-mg-glyc-120",
+  "actor_decision": "allow",
+  "quantity": 1
+}</textarea><span class="sr" id="lab-help">Edit the JSON. The fingerprint updates automatically. Only objects with integer numbers are accepted in this simplified lab.</span><div class="lab-actions"><button class="btn" id="tamper-btn" type="button">Change quantity to 2</button><button class="btn secondary" id="reset-btn" type="button">Restore original</button></div><div class="hashes"><div class="hash"><small>Original SHA-256</small><code id="original-hash">Calculated when JavaScript is enabled.</code></div><div class="hash"><small>Current SHA-256</small><code id="current-hash">Calculated when JavaScript is enabled.</code></div></div><div class="lab-result neutral" id="lab-result" role="status" aria-live="polite">Preparing the local fingerprint comparison…</div></div>
     </div>
-
-    <div class="panel receipt-layout">
-      <div>
-        <div class="receipt-card">
-          <div class="receipt-head">
-            <div><h3>Decision Receipt</h3><span>Illustrative structure</span></div>
-            <span>RAMIFY OS</span>
-          </div>
-          <div class="receipt-body">
-            <div class="receipt-row" data-label="Decision" data-title="What was decided" data-text="The receipt records the chosen outcome rather than relying only on what was shown on screen.">
-              <div class="receipt-key">Decision</div><div class="receipt-value">Selected pathway / chosen action</div>
-            </div>
-            <div class="receipt-row" data-label="Evidence" data-title="What supported the decision" data-text="Evidence references keep the decision connected to the information used to reach it.">
-              <div class="receipt-key">Evidence</div><div class="receipt-value">Linked supporting artefacts and references</div>
-            </div>
-            <div class="receipt-row" data-label="Status" data-title="What state the decision was in" data-text="Status information helps show whether the required decision steps were complete at the time of the receipt.">
-              <div class="receipt-key">Status</div><div class="receipt-value">Verified / ready / review required</div>
-            </div>
-            <div class="receipt-row" data-label="Timestamp" data-title="When the record was created" data-text="Time information helps place the receipt in the history of the decision and later human review.">
-              <div class="receipt-key">Timestamp</div><div class="receipt-value">Created at decision time</div>
-            </div>
-            <div class="receipt-row" data-label="SHA-256" data-title="The content fingerprint" data-text="A SHA-256 digest changes when the protected receipt content changes, so it can be used to detect tampering.">
-              <div class="receipt-key">SHA-256</div><div class="receipt-value"><code>f8c2…4a91</code></div>
-            </div>
-            <div class="receipt-row" data-label="Ed25519" data-title="The digital signature" data-text="The signature provides a way to check that the receipt was signed by the expected key and has not been silently replaced.">
-              <div class="receipt-key">Ed25519</div><div class="receipt-value"><code>signature: valid</code></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <aside class="receipt-side">
-        <h3 id="receiptTitle">What was decided</h3>
-        <p id="receiptText">The receipt records the chosen outcome rather than relying only on what was shown on screen.</p>
-
-        <div class="receipt-explain">
-          <small>Plain English</small>
-          <strong>Think of the receipt as the “paper trail” of a digital decision.</strong>
-          <p>It gives RAMIFY something concrete to verify before an action is allowed.</p>
-        </div>
-
-        <div class="receipt-explain" style="border-left-color:var(--green)">
-          <small>Why it matters</small>
-          <strong>The final screen is not the only source of truth.</strong>
-          <p>The system keeps a separate record that can be checked again later.</p>
-        </div>
-      </aside>
-    </div>
+    <div class="verification-grid"><article class="card"><h3>01 · Receipt integrity</h3><p>The backend recomputes the hash, verifies the signature, resolves issuer references and checks scope. A matching hash alone is insufficient: someone could edit content and recompute an unsigned hash.</p></article><article class="card"><h3>02 · Current purchase authority</h3><p>The prototype adds a one-hour receipt window. A historically intact record may be too old to authorise a new purchase. Integrity and freshness answer different questions.</p></article><article class="card"><h3>03 · Action &amp; transaction checks</h3><p>The Action Gate checks the requested action against sealed permissions. Checkout also binds the product, actor, quantity and total, and rejects reused or superseded authority.</p></article></div>
   </section>
 
-  <section id="trust">
-    <div class="section-head">
-      <div class="section-index">05 · Verification</div>
-      <div>
-        <h2>Try the tamper check</h2>
-        <p>This small interactive demo explains the purpose of SHA-256 and Ed25519 without turning the page into a cryptography lesson.</p>
-      </div>
-    </div>
-
-    <div class="panel trust-grid">
-      <div class="trust-copy">
-        <h3>Two different questions are being checked.</h3>
-        <p><strong>SHA-256:</strong> “Has this protected content changed?”<br><strong>Ed25519:</strong> “Does this signature verify against the expected key?”</p>
-
-        <div class="trust-steps">
-          <div class="trust-step"><div class="n">1</div><div><strong>Build the receipt</strong><span>Put the decision and its supporting details into a stable record.</span></div></div>
-          <div class="trust-step"><div class="n">2</div><div><strong>Create the fingerprint</strong><span>Generate the SHA-256 digest for that receipt.</span></div></div>
-          <div class="trust-step"><div class="n">3</div><div><strong>Check the signature</strong><span>Verify the Ed25519 signature using the expected public key.</span></div></div>
-          <div class="trust-step"><div class="n">4</div><div><strong>Pass the result to the Action Gate</strong><span>Continue only when the required verification succeeds.</span></div></div>
-        </div>
-      </div>
-
-      <div class="lab">
-        <div class="lab-top">
-          <h3>Receipt verification demo</h3>
-          <span class="status" id="statusBadge">VALID</span>
-        </div>
-
-        <div class="lab-screen">
-          <div class="lab-line"><span>receipt_id</span><span>R-2048</span></div>
-          <div class="lab-line"><span>decision</span><span id="decisionValue">selected_path_A</span></div>
-          <div class="lab-line"><span>sha256</span><span id="hashValue">f8c2…4a91</span></div>
-          <div class="lab-line"><span>signature</span><span id="signatureValue">valid</span></div>
-          <div class="lab-line"><span>action_gate</span><span id="gateValue">ALLOW</span></div>
-        </div>
-
-        <div class="lab-actions">
-          <button class="lab-btn" id="tamperBtn">Change receipt content</button>
-          <button class="lab-btn" id="resetBtn">Reset</button>
-        </div>
-
-        <div class="lab-message" id="labMessage">
-          The receipt matches its expected fingerprint and signature. The Action Gate can continue.
-        </div>
-      </div>
-    </div>
+  <section class="section" id="review" aria-labelledby="review-title">
+    <div class="section-head"><div><p class="eyebrow">07 / Human accountability</p><h2 id="review-title">Review adds a record.<br>It preserves the past.</h2></div><p>A human decision has its own place in the audit trail. The original machine result remains available, together with the reason for any permitted, one-time authorisation.</p></div>
+    <div class="flow-track"><article class="flow-card"><span class="step">01 <span aria-hidden="true">→</span></span><h3>Machine assessment</h3><p>The system records the objective posture, actor restrictions, evidence findings and a sealed receipt.</p></article><article class="flow-card highlight"><span class="step">02 <span aria-hidden="true">→</span></span><h3>Eligible human review</h3><p>A person inspects the reasons and may decline, or authorise an eligible case once with an explicit rationale.</p></article><article class="flow-card"><span class="step">03 <span aria-hidden="true">→</span></span><h3>Linked successor</h3><p>A system-sealed Human Receipt links back through <code>supersedes_receipt</code>. The original product truth is retained.</p></article><article class="flow-card"><span class="step">04 <span aria-hidden="true">↗</span></span><h3>Verified next step</h3><p>The authorised action is checked again. A simulated order or requisition links each line to its supporting receipt.</p></article></div>
+    <div class="review-rules"><div class="rule"><strong>Review is a controlled exception</strong><p>One-time authorisation is restricted to eligible review cases. Transaction authority is tied to the sealed context and purchase style; procurement review does not create a consumer checkout path.</p></div><div class="rule stop"><strong>Some findings cannot be overridden</strong><p>A recall or other hard stop cannot be approved away. Incomplete evidence cannot receive purchase authority. The system requires a new assessment when the underlying information changes.</p></div></div>
+    <div class="callout"><span class="eyebrow">Lineage, not replacement</span><p>Preserving the machine result and linking a human successor makes it possible to inspect <strong>what the system found, what the person decided and which record authorised the action.</strong></p></div>
   </section>
 
-  <section id="review">
-    <div class="section-head">
-      <div class="section-index">06 · Human review</div>
-      <div>
-        <h2>A review should add history, not erase it</h2>
-        <p>If a person needs to intervene, RAMIFY can preserve the original receipt and create a successor receipt for the reviewed outcome.</p>
-      </div>
-    </div>
-
-    <div class="panel review">
-      <div class="review-track">
-        <div class="review-box">
-          <h3>Original Receipt</h3>
-          <p>The first signed decision record remains available as part of the history.</p>
-        </div>
-        <div class="review-arrow">→</div>
-        <div class="review-box human">
-          <h3>Human Review</h3>
-          <p>A reviewer records the reason for the intervention and the updated outcome.</p>
-        </div>
-        <div class="review-arrow">→</div>
-        <div class="review-box next">
-          <h3>Successor Receipt</h3>
-          <p>A new signed receipt is created and linked back to the earlier one.</p>
-        </div>
-      </div>
-      <div class="review-note">This avoids silently overwriting the earlier decision. A reviewer can see both the original state and the later human-reviewed continuation.</div>
-    </div>
+  <section class="section" id="architecture" aria-labelledby="architecture-title">
+    <div class="section-head"><div><p class="eyebrow">08 / Under the surface</p><h2 id="architecture-title">A clear boundary<br>around the decision.</h2></div><p>The supplied ZIP contains the Python/FastAPI release. Optional local AI supports language tasks; the trust engine, policy, review and transaction authority are deterministic.</p></div>
+    <div class="architecture"><div class="arch-layers">
+      <div class="arch-col"><h3>Input &amp; explanation</h3><div class="arch-node"><strong>Browser interface</strong><p>Shop, agent profiles, review, activity and technical inspection pages.</p></div><div class="arch-node violet"><strong>Interpretation adapter</strong><p>Exact matching and safe matching, with optional LangGraph + Ollama / Llama 3.1.</p></div><div class="arch-node"><strong>Read-only explanation</strong><p>Explain an already sealed result without altering product truth or permissions.</p></div></div>
+      <div class="arch-col core"><h3>Deterministic RAMIFY core</h3><div class="arch-node dark"><strong>RESOLVE + RATIFY</strong><p>Identify → Resolve → Status → Verify. Evaluate identity, standing, artefacts, claims and conflicts.</p></div><div class="arch-connector" aria-hidden="true">↓ findings → objective posture</div><div class="arch-node"><strong>Assess + actor policy + Action Gate</strong><p>Apply precedence, narrow permissions and select the permitted next step.</p></div><div class="arch-connector" aria-hidden="true">↓ finished decision → sealing</div><div class="arch-node"><strong>Receipt builder + verifier</strong><p>Canonical JSON, SHA-256 and Ed25519. Re-verify authority at action and checkout boundaries.</p></div></div>
+      <div class="arch-col"><h3>State &amp; audit outputs</h3><div class="arch-node"><strong>Curated evidence</strong><p>Synthetic dataset, category policy, artefact files, issuer records and trust keys.</p></div><div class="arch-node"><strong>Local receipt history</strong><p>Machine receipts, Human Receipts, action events and transaction records.</p></div><div class="arch-node"><strong>Portable Proof Pack</strong><p>Export receipts, artefacts, policies and verification material for independent inspection.</p></div></div>
+    </div><div class="arch-bottom"><b>Trust boundary</b><span>The model does not choose the objective posture, sign receipts, override a recall or grant purchase authority.</span></div></div>
+    <details><summary>Technical detail: API routes and an assessment request</summary><div class="details-body"><p>These routes belong to the full FastAPI application. They are documented here for reviewers; this standalone companion does not send requests to them.</p><div id="api-routes"></div><div class="codebox"><div class="codebar"><span id="request-label">POST /assess · JSON request body</span><button class="copy" type="button" data-copy="api-example">Copy JSON</button></div><pre id="api-example">{
+  "identifier": "ramify:demo:supp:apex-mg-glyc-120",
+  "actor_ref": "consumer_v1"
+}</pre></div><p class="source-note" id="api-note">Source: <code>api/app.py</code> and <code>api/models.py</code>. A decision assessment is distinct from purchase authority.</p></div></details>
+    <details><summary>Technical detail: how findings become a posture</summary><div class="details-body"><p>All applicable conditions are evaluated. The most restrictive matched posture wins; the precedence order chooses the primary explanatory reason. All matched reason codes remain available.</p><div class="table-wrap"><table><thead><tr><th scope="col">Condition in the demo policy</th><th scope="col">Result</th></tr></thead><tbody><tr><td>Recall or hard-stop failure</td><td><code>block</code></td></tr><tr><td>Evidence or required claims incomplete</td><td><code>escalate</code></td></tr><tr><td>Active advisory</td><td><code>hold</code></td></tr><tr><td>Review finding, otherwise complete and clean standing</td><td><code>allow_with_warning</code></td></tr><tr><td>All checks pass and standing is clean</td><td><code>allow</code></td></tr></tbody></table></div><p class="source-note">Restrictiveness: <code>allow &lt; allow_with_warning &lt; hold &lt; escalate &lt; block</code>. A replacement product is a relationship and a possible next step, not a sixth posture.</p></div></details>
+    <details><summary>Technical detail: terminology in the source</summary><div class="details-body"><dl class="glossary"><div><dt>Subject</dt><dd>The identified product or scoped item being assessed.</dd></div><div><dt>Standing</dt><dd>The applicable recall, advisory or unknown status of a product or batch.</dd></div><div><dt>Issuer</dt><dd>An entity associated with a claim or evidence record and known trust material.</dd></div><div><dt>Artefact</dt><dd>The actual evidence file whose bytes can be hashed and checked.</dd></div><div><dt>Objective posture</dt><dd>The deterministic result from product facts before buyer restrictions.</dd></div><div><dt>Actor decision</dt><dd>The result after the selected buyer’s policy narrows that posture.</dd></div><div><dt>Canonical JSON</dt><dd>A defined, repeatable serialisation used before hashing the receipt.</dd></div><div><dt>Decision Receipt</dt><dd>The sealed record of checks, policy, outcomes and permitted actions.</dd></div><div><dt>Successor receipt</dt><dd>A linked record that preserves the earlier decision while recording a later step.</dd></div></dl></div></details>
   </section>
 
-  <section id="features">
-    <div class="section-head">
-      <div class="section-index">07 · Product details</div>
-      <div>
-        <h2>Other parts of the RAMIFY experience</h2>
-        <p>These features support the journey around the core decision and verification flow.</p>
-      </div>
-    </div>
-
-    <div class="panel features">
-      <div class="feature"><small>Onboarding</small><h3>Guided Tour</h3><p>Introduces the journey so a first-time user knows where to start.</p></div>
-      <div class="feature"><small>Orientation</small><h3>Overview Voice-over</h3><p>Explains the experience before the user starts making choices.</p></div>
-      <div class="feature"><small>Clarity</small><h3>Persona Colour Coding</h3><p>Helps distinguish perspectives or roles in the interface.</p></div>
-      <div class="feature"><small>Commitment</small><h3>Shopping Cart Lock-in</h3><p>Reduces accidental changes once the decision reaches a committed stage.</p></div>
-      <div class="feature"><small>Decision Point</small><h3>Resolve UI</h3><p>Makes the moment of choice visible rather than hiding it behind the flow.</p></div>
-      <div class="feature"><small>Deployment</small><h3>Local-first Demo</h3><p>The demo can run on 127.0.0.1, with optional local model support through Ollama.</p></div>
-    </div>
+  <section class="section" id="proof" aria-labelledby="proof-title">
+    <div class="section-head"><div><p class="eyebrow">09 / Evidence you can take away</p><h2 id="proof-title">Inspectable by design.<br>Clear about its scope.</h2></div><p>The prototype demonstrates the decision and verification mechanics with a deliberately small, synthetic catalogue. Its scope and reported validation are part of the explanation.</p></div>
+    <div class="proof-grid"><article class="proof-main"><span class="eyebrow" style="color:var(--lime)">In the full application</span><h3 style="margin-top:14px">A portable Proof Pack.</h3><p>The application can export a ZIP for inspecting the evidence trail away from the running demo.</p><ul class="pack-list"><li><span>01</span>Signed receipts and an index of the included cases</li><li><span>02</span>Evidence artefacts, hashes and issuer signatures</li><li><span>03</span>Policy snapshot and public verification keys</li><li><span>04</span>Verification tooling and explanatory notes</li></ul><p style="font-size:12px;margin:20px 0 0">A portable verifier checks the exported material. Trust in the public keys still needs an independently established basis.</p></article><div class="proof-side"><article class="card"><span class="micro-label">Packaged dataset</span><h3 style="margin-top:10px">A repeatable demonstration</h3><p>9 supplements and 3 protective-equipment items, 5 sellers, 20 evidence records and 3 fictional issuers. Evidence dates are assessed against the fixed snapshot of <strong>24 July 2026</strong>.</p></article><article class="card"><span class="micro-label">Reported release validation · 25 Sep 2026</span><div class="reported">434 <small>tests passed</small></div><p>The packaged README reports <strong>1,329 subtests passed</strong>, <strong>7 skipped</strong> and no failures for validation run #17, plus frontend syntax checks.</p><p style="font-size:11px;margin-top:12px">These are the release’s recorded results, not a new backend test run for this page. Optional environment-dependent skips do not prove live-model or visual-browser execution.</p></article></div></div>
+    <div class="scope-banner"><h3>A working prototype with a defined boundary</h3><p>Products, brands, laboratories, certificates and prices are invented. Checkout and requisitions are simulated; no money moves. Hashing and signatures in the backend are real, but the demo is not real-world product certification or a production purchasing system. Production use would require real integrations, protected key custody, governance, revocation and operational controls.</p></div>
+    <details><summary>Source notes: where this companion’s details come from</summary><div class="details-body"><p>Prepared from the supplied <code>Fastapi.zip</code> (RAMIFY OS v11.0.7) and the original poster companion <code>QR_code.html</code>. Source paths below are references inside that archive.</p><ol class="sources"><li><code>README.md</code>, <code>FINAL_RELEASE_SUMMARY_25_SEP_2026.md</code> — release scope, reported checks and optional AI boundary.</li><li><code>frontend/pages/about.html</code> and <code>frontend/pages/technical.html</code> — project purpose, demo scope and technical vocabulary.</li><li><code>backend/ramify/data/demo_seed.json</code> — products, actors and named expected outcomes.</li><li><code>backend/ramify/data/policy_pack_demo_v1.json</code> — seven checks and demonstration policy.</li><li><code>backend/ramify/engine.py</code>, <code>resolve/primitives.py</code>, <code>ratify/</code> and <code>policy/</code> — evaluation and restriction logic.</li><li><code>backend/ramify/receipt/</code>, <code>crypto/</code> and <code>action/</code> — sealing, integrity, review and transaction authority.</li><li><code>backend/ramify/api/app.py</code>, <code>api/models.py</code> and <code>scripts/portable_verify.py</code> — API contract and portable verification.</li></ol><p>This file is a self-contained explanatory website. Its scenario explorer uses embedded examples, and its fingerprint lab performs only the local comparison described above.</p></div></details>
   </section>
 
-  <section id="details">
-    <div class="section-head">
-      <div class="section-index">08 · Technical notes</div>
-      <div>
-        <h2>For reviewers who want the deeper version</h2>
-        <p>The page stays readable for non-ICT visitors, while the technical details are still available here.</p>
-      </div>
-    </div>
-
-    <div class="panel accordion">
-      <div class="acc">
-        <button class="acc-btn"><span>Why use a separate Decision Receipt?</span><span>＋</span></button>
-        <div class="acc-content"><p>A receipt separates the auditable decision record from the temporary user interface state. It can carry the outcome, evidence references, metadata and verification material in one place.</p></div>
-      </div>
-
-      <div class="acc">
-        <button class="acc-btn"><span>What does the Action Gate check?</span><span>＋</span></button>
-        <div class="acc-content"><p>The Action Gate sits after verification. In the intended flow, it requires the necessary signed receipt checks to pass before the action proceeds; an invalid or tampered record can be blocked or sent for review.</p></div>
-      </div>
-
-      <div class="acc">
-        <button class="acc-btn"><span>How does the tamper test help?</span><span>＋</span></button>
-        <div class="acc-content"><p>The demo deliberately changes receipt content and then shows verification failing. That demonstrates the integrity mechanism as behaviour, not just as text on the screen.</p></div>
-      </div>
-
-      <div class="acc">
-        <button class="acc-btn"><span>What is the local-first setup?</span><span>＋</span></button>
-        <div class="acc-content"><p>The demonstration is designed to run locally on 127.0.0.1. Optional Ollama support can provide a local model path, while receipt verification remains a separate trust mechanism.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <span>RAMIFY OS · QR technical companion</span>
-    <span>Identify → Resolve → Status → Verify → Assess</span>
-  </footer>
-</div>
-
-<script>
-/* ---------- scroll progress ---------- */
-const progress = document.getElementById("progress");
-function updateProgress(){
-  const doc = document.documentElement;
-  const max = doc.scrollHeight - doc.clientHeight;
-  progress.style.width = (max ? (doc.scrollTop / max) * 100 : 0) + "%";
-}
-document.addEventListener("scroll", updateProgress, {passive:true});
-updateProgress();
-
-/* ---------- journey interaction ---------- */
-const steps = [...document.querySelectorAll(".journey-step")];
-const journeyTitle = document.getElementById("journeyTitle");
-const journeyCopy = document.getElementById("journeyCopy");
-const journeyMeta = document.getElementById("journeyMeta");
-
-steps.forEach(step=>{
-  step.addEventListener("click",()=>{
-    steps.forEach(s=>s.classList.remove("active"));
-    step.classList.add("active");
-    journeyTitle.textContent = step.dataset.title;
-    journeyCopy.textContent = step.dataset.copy;
-    journeyMeta.innerHTML = "";
-    step.dataset.meta.split("|").forEach(item=>{
-      const chip = document.createElement("span");
-      chip.className = "meta-chip";
-      chip.textContent = item;
-      journeyMeta.appendChild(chip);
-    });
-  });
-});
-
-/* ---------- receipt anatomy ---------- */
-const receiptRows = [...document.querySelectorAll(".receipt-row")];
-const receiptTitle = document.getElementById("receiptTitle");
-const receiptText = document.getElementById("receiptText");
-
-receiptRows.forEach(row=>{
-  row.addEventListener("click",()=>{
-    receiptTitle.textContent = row.dataset.title;
-    receiptText.textContent = row.dataset.text;
-    receiptRows.forEach(r=>r.style.outline="none");
-    row.style.outline="2px solid rgba(92,85,199,.18)";
-  });
-});
-
-/* ---------- tamper simulation ---------- */
-const tamperBtn = document.getElementById("tamperBtn");
-const resetBtn = document.getElementById("resetBtn");
-const statusBadge = document.getElementById("statusBadge");
-const decisionValue = document.getElementById("decisionValue");
-const hashValue = document.getElementById("hashValue");
-const signatureValue = document.getElementById("signatureValue");
-const gateValue = document.getElementById("gateValue");
-const labMessage = document.getElementById("labMessage");
-
-function setValid(){
-  statusBadge.textContent = "VALID";
-  statusBadge.classList.remove("bad");
-  decisionValue.textContent = "selected_path_A";
-  hashValue.textContent = "f8c2…4a91";
-  signatureValue.textContent = "valid";
-  gateValue.textContent = "ALLOW";
-  labMessage.classList.remove("bad");
-  labMessage.textContent = "The receipt matches its expected fingerprint and signature. The Action Gate can continue.";
-}
-
-function setTampered(){
-  statusBadge.textContent = "FAILED";
-  statusBadge.classList.add("bad");
-  decisionValue.textContent = "selected_path_B  ← changed";
-  hashValue.textContent = "mismatch";
-  signatureValue.textContent = "invalid";
-  gateValue.textContent = "BLOCK";
-  labMessage.classList.add("bad");
-  labMessage.textContent = "The receipt content changed. The expected fingerprint no longer matches, so the Action Gate blocks the action.";
-}
-
-tamperBtn.addEventListener("click", setTampered);
-resetBtn.addEventListener("click", setValid);
-
-/* ---------- accordion ---------- */
-document.querySelectorAll(".acc-btn").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const box = btn.parentElement;
-    const wasOpen = box.classList.contains("open");
-
-    document.querySelectorAll(".acc").forEach(acc=>{
-      acc.classList.remove("open");
-      acc.querySelector(".acc-btn span:last-child").textContent = "＋";
-    });
-
-    if(!wasOpen){
-      box.classList.add("open");
-      btn.querySelector("span:last-child").textContent = "−";
-    }
-  });
-});
-
-/* ---------- quiet reveal ---------- */
-const reveal = new IntersectionObserver(entries=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
-      entry.target.animate(
-        [{opacity:0, transform:"translateY(10px)"},{opacity:1, transform:"translateY(0)"}],
-        {duration:420,easing:"ease-out",fill:"both"}
-      );
-      reveal.unobserve(entry.target);
-    }
-  });
-},{threshold:.08});
-
-document.querySelectorAll("section").forEach(section=>reveal.observe(section));
-</script>
-</body>
-</html>
+  <section class="section faq-layout" id="faq" aria-labelledby="faq-title"><div class="faq-intro"><p class="eyebrow" style="color:var(--green2)">10 / The useful questions</p><h2 id="faq-title">A little more clarity.</h2><p>For visitors who scanned the poster and want to understand what the project actually demonstrates.</p></div><div class="faq-list">
+    <details><summary>Does the AI make the trust decision?</summary><div class="details-body"><p>The optional model interprets language and explains sealed results. Deterministic RESOLVE and RATIFY checks, actor policy and the Action Gate determine the product posture and permitted action.</p></div></details>
+    <details><summary>Why are warning and review both orange?</summary><div class="details-body"><p>They both need attention, but they grant different capabilities. <code>allow_with_warning</code> can permit an action subject to the actor’s rules. <code>hold</code> and <code>escalate</code> stop automated buying. The text label and machine posture carry the decision; colour alone does not.</p></div></details>
+    <details><summary>Does a valid signature prove the product is safe?</summary><div class="details-body"><p>It verifies that the recorded content matches a signature under a trusted key. The evidence still needs valid dates, relevant scope, authorised issuers and appropriate policy checks. The supplied evidence is synthetic and certifies no real product.</p></div></details>
+    <details><summary>Can a receipt be edited?</summary><div class="details-body"><p>A file can be changed. Recomputing the hash and checking the signature makes unauthorised content changes detectable. This is tamper evidence, not a promise that storage is impossible to alter or that signing keys cannot be compromised.</p></div></details>
+    <details><summary>Can a human override a recalled product?</summary><div class="details-body"><p>No. Hard stops remain blocked. Human review can authorise eligible cases once, with a linked record and rationale. Incomplete evidence does not become purchase authority through approval.</p></div></details>
